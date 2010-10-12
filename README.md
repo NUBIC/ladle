@@ -19,15 +19,15 @@ available whether you are using JRuby or not.
 Ladle in 30 seconds
 -------------------
 
-To use Ladle, first create a server:
+To use Ladle, first create a server with some data:
 
-    server = Ladle::Server.new(:port => 3897)
+    server = Ladle::Server.new(
+      :port   => 3897,
+      :ldif   => "test_users.ldif",
+      :domain => "dc=test"
+    )
 
-Then load some data:
-
-    server.load_ldif("test_users.ldif")
-
-And start the server:
+Then start the server:
 
     server.start
 
@@ -54,10 +54,8 @@ To use a server per test, configure and start it in a normal `before`
 block, then stop it in an `after` block:
 
     describe "directory access" do
-      LDAP_PORT = 4200
-
       before do
-        @ldap_server = Ladle::Server.new(:port => LDAP_PORT, :ldif => %w(test_users.ldif)).start
+        @ldap_server = Ladle::Server.new.start
       end
 
       after do
@@ -74,6 +72,20 @@ For a shared server, use `before(:all)` and `after(:all)` instead.
 ### Cucumber
 
 **TODO**
+
+Test data
+---------
+
+Ladle accepts data in the [standard][rfc2849] LDIF format.  If you do
+not specify an LDIF file when creating the server, ladle will use its
+default data.  You can peruse it in `lib/ladle/default.ldif`.
+
+Note also that you will usually need to provide both the `:ldif` and
+`:domain` configuration parameters.  The latter must be the domain
+matching the data in the former.  (N.b. the implicit restriction of
+the data to a single domain.)
+
+[rfc2849]: http://tools.ietf.org/rfc/rfc2849.txt
 
 About
 -----
