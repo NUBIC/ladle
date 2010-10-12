@@ -1,0 +1,3 @@
+module Ladle
+  # Your code goes here...
+end
