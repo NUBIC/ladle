@@ -1,3 +1,3 @@
 module Ladle
-  # Your code goes here...
+  autoload :VERSION, "ladle/version"
 end

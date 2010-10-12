@@ -15,4 +15,6 @@ Gem::Specification.new do |s|
   s.files         = Dir["{lib,spec}/**/*"] + Dir["*.md"] + Dir["*LICENSE"] + %w(NOTICE)
   s.test_files    = Dir["spec/**/*"]
   s.require_paths = ["lib"]
+
+  s.add_development_dependency "rspec", "~> 2.0.0"
 end
