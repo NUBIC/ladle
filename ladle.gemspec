@@ -6,16 +6,13 @@ Gem::Specification.new do |s|
   s.name        = "ladle"
   s.version     = Ladle::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["TODO: Write your name"]
-  s.email       = ["TODO: Write your email address"]
-  s.homepage    = "http://rubygems.org/gems/ladle"
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.authors     = ["Rhett Sutphin"]
+  s.email       = ["rhett@detailedbalance.net"]
+  s.homepage    = "http://github.com/rsutphin/ladle"
+  s.summary     = %q{Dishes out steaming helpings of LDAP for fluid testing}
+  s.description = %q{Provides an embedded LDAP server for BDD.  The embedded server is built with ApacheDS.}
 
-  s.rubyforge_project = "ladle"
-
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.files         = Dir["{lib,spec}/**/*"] + Dir["*.md"] + Dir["*LICENSE"] + %w(NOTICE)
+  s.test_files    = Dir["spec/**/*"]
   s.require_paths = ["lib"]
 end

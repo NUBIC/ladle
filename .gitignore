@@ -1,3 +1,6 @@
 pkg/*
 *.gem
 .bundle
+work
+tmp
+Gemfile.lock
