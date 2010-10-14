@@ -4,3 +4,7 @@ pkg/*
 work
 tmp
 Gemfile.lock
+
+# YARD
+.yardoc
+doc

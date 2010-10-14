@@ -2,10 +2,12 @@
 $:.push File.expand_path("../lib", __FILE__)
 require "ladle/version"
 
+java = (RUBY_PLATFORM == 'java')
+
 Gem::Specification.new do |s|
   s.name        = "ladle"
   s.version     = Ladle::VERSION
-  s.platform    = Gem::Platform::RUBY
+  s.platform    = java ? Gem::Platform::JAVA : Gem::Platform::RUBY
   s.authors     = ["Rhett Sutphin"]
   s.email       = ["rhett@detailedbalance.net"]
   s.homepage    = "http://github.com/rsutphin/ladle"
@@ -17,4 +19,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_development_dependency "rspec", "~> 2.0.0"
+  s.add_development_dependency "yard", "~> 0.6.1"
+  s.add_development_dependency java ? "maruku" : "rdiscount"
 end

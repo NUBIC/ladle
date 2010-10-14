@@ -94,4 +94,4 @@ Ladle is copyright 2010 Rhett Sutphin.  It was built at [NUBIC][].
 See the `NOTICE` file alongside this one for copyright information
 about software ladle depends on and redistributes.
 
-[NUBIC][]: http://www.nucats.northwestern.edu/centers/nubic
+[NUBIC]: http://www.nucats.northwestern.edu/centers/nubic
