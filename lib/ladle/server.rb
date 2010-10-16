@@ -69,6 +69,8 @@ module Ladle
     # not return until the server is listening on the specified port.
     # The same {Server} instance can be started and stopped multiple
     # times, but the runs will be independent.
+    #
+    # @return [Server] this instance
     def start
       log "Starting server on #{port}"
       trace "  Server command: #{server_cmd}"
@@ -87,6 +89,8 @@ module Ladle
       end
 
       at_exit { stop }
+
+      self
     end
 
     def stop

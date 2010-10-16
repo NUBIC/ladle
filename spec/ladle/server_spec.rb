@@ -53,10 +53,18 @@ describe Ladle, "::Server" do
       @server = Ladle::Server.new
     end
 
+    after do
+      @server.stop
+    end
+
     it "should block until the server is up" do
       @server.start
       lambda { TCPSocket.new('localhost', @server.port) }.
         should_not raise_error
+    end
+
+    it "returns the server object" do
+      @server.start.should be(@server)
     end
 
     it "should use the right port"
