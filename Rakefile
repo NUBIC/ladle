@@ -9,6 +9,27 @@ RSpec::Core::RakeTask.new do |t|
   t.pattern = "spec/**/*_spec.rb"
 end
 
+task :spec => [:compile]
+
+desc "Remove the compiled artifacts"
+task :clean do
+  Dir['**/*.class'].each { |fn| rm_rf fn }
+end
+
+desc "Compile the java adapter code"
+task :compile do
+  puts "Compiling java support code"
+  jars = Dir['lib/ladle/apacheds/*.jar'].collect { |fn| File.expand_path(fn) }
+  javac = ENV['JAVA_HOME'] ? ENV['JAVA_HOME'] + "/bin/javac" : "javac"
+  one_cmd(
+    javac, '-cp', "'#{jars.join(':')}'",
+    ('-verbose' if Rake.application.options.trace),
+    'lib/ladle/java/net/detailedbalance/ladle/*.java')
+end
+
+# build task is provided by bundler's gem helper
+task :build => [:clean, :compile]
+
 desc "Run the yard server with automatic reloading enabled"
 task :yard => ['yard:auto']
 
@@ -18,7 +39,7 @@ namespace :yard do
   end
 
   task :auto do
-    system("bundle exec yard server --reload")
+    one_cmd("bundle exec yard server --reload")
   end
 
   desc "Remove the YARD cache and the generated docs"
@@ -26,4 +47,10 @@ namespace :yard do
     rm_rf '.yardoc'
     rm_rf 'doc'
   end
+end
+
+def one_cmd(*cmd)
+  str = cmd.compact.join(' ')
+  puts str if Rake.application.options.trace
+  system(str)
 end

@@ -4,7 +4,12 @@ pkg/*
 work
 tmp
 Gemfile.lock
+*.class
 
 # YARD
 .yardoc
 doc
+
+# IDEA
+.idea
+*.iml

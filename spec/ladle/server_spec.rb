@@ -1,5 +1,7 @@
 require File.expand_path("../../spec_helper.rb", __FILE__)
 
+# require 'net/ldap'
+
 describe Ladle, "::Server" do
   describe "initialization of" do
     describe ":port" do
@@ -44,5 +46,20 @@ describe Ladle, "::Server" do
           should raise_error("Cannot read specified LDIF file foo/bar.ldif.")
       end
     end
+  end
+
+  describe "#start" do
+    before do
+      @server = Ladle::Server.new
+    end
+
+    it "should block until the server is up" do
+      @server.start
+      lambda { TCPSocket.new('localhost', @server.port) }.
+        should_not raise_error
+    end
+
+    it "should use the right port"
+    it "should use the specified data"
   end
 end
