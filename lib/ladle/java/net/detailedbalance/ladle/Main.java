@@ -49,7 +49,7 @@ public class Main {
             //noinspection LoopStatementThatDoesntLoop
             while ((line = in.readLine()) != null) {
                 if ("STOP".equals(line)) {
-                    System.exit(0); // shutdown hooks will handle stopping everything
+                    System.exit(0); // shutdown hook will handle stopping everything
                 } else {
                     System.out.println("FATAL: unknown control message \"" + line + '"');
                     System.exit(9);

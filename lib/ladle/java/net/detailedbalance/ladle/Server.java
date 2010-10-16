@@ -90,7 +90,7 @@ public class Server {
             throw new LadleFatalException("Failed to create partition", e);
         }
 
-        svc.setShutdownHookEnabled(true);
+        svc.setShutdownHookEnabled(false);
         svc.setExitVmOnShutdown(false);
         svc.getChangeLog().setEnabled(false);
         svc.setWorkingDirectory(tempDir);
@@ -157,14 +157,18 @@ public class Server {
     public void stop() {
         if (!running) return;
         server.stop();
+        try {
+            service.shutdown();
+        } catch (Exception e) {
+            log.error("Shutting down the directory service failed", e);
+        }
         running = false;
 
         if (tempDir.exists()) {
             try {
                 FileUtils.deleteDirectory(tempDir);
             } catch (IOException e) {
-                throw new LadleFatalException(
-                    "Deleting the temporary directory " + tempDir + " failed", e);
+                log.error("Deleting the temporary directory " + tempDir + " failed", e);
             }
         }
     }
