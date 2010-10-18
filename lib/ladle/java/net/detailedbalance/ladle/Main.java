@@ -1,5 +1,11 @@
 package net.detailedbalance.ladle;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -22,7 +28,14 @@ public class Main {
     public static void main(String[] args) {
         configureLog4j();
 
+        CommandLine commandLine = parseArgs(args);
+
         try {
+            if (commandLine.hasOption('F') && "before_start".equals(commandLine.getOptionValue('F'))) {
+                reportError("Expected failure for testing");
+                System.exit(207);
+            }
+
             final Server s = new Server(3897, "dc=example,dc=org",
                 new File("lib/ladle/default.ldif"), new File("/tmp"));
 
@@ -61,6 +74,24 @@ public class Main {
         }
     }
 
+    @SuppressWarnings({"AccessStaticViaInstance"})
+    private static CommandLine parseArgs(String[] args) {
+        Options options = new Options()
+            .addOption(OptionBuilder.
+                withLongOpt("fail").hasArg().
+                    withDescription("Force a failure (for testing)").
+                create('F'));
+        CommandLineParser parser = new GnuParser();
+
+        try {
+            return parser.parse(options, args);
+        } catch (ParseException e) {
+            reportError(e);
+            System.exit(18);
+            return null; // unreachable
+        }
+    }
+
     private static void configureLog4j() {
         ConsoleAppender appender = new ConsoleAppender();
         appender.setWriter(new PrintWriter(System.err));
@@ -70,7 +101,11 @@ public class Main {
     }
 
     private static void reportError(Exception e) {
-        System.out.println("FATAL: " + e.getMessage());
+        reportError(e.getMessage());
         e.printStackTrace(System.err);
+    }
+
+    private static void reportError(String message) {
+        System.out.println("FATAL: " + message);
     }
 }

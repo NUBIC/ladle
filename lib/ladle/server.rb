@@ -55,6 +55,10 @@ module Ladle
       @verbose = true
       @timeout = 30
 
+      # Additional arguments that can be passed to the java server
+      # process.  Used for testing only, so not documented.
+      @additional_args = opts[:more_args] || []
+
       unless @domain =~ /^dc=/
         raise "The domain component must start with 'dc='.  '#{@domain}' does not."
       end
@@ -72,32 +76,42 @@ module Ladle
     #
     # @return [Server] this instance
     def start
+      return if @running
       log "Starting server on #{port}"
-      trace "  Server command: #{server_cmd}"
-      @java_in, @java_out, java_err = Open3.popen3(server_cmd)
+      trace "- Server command: #{server_cmd}"
+      java_in, java_out, java_err = Open3.popen3(server_cmd)
       @running = true
-      @err_printer = Thread.new do
-        while l = java_err.readline
-          $stderr.puts "Java Err: #{l}"
-        end
-      end
 
-      trace "Looking for STARTED"
-      until (l = @java_out.readline) =~ /STARTED/
-        puts l
+      @comm_threads = ThreadGroup.new
+      @comm_threads.add(LogStreamWatcher.new(java_err, self).start)
+      @controller = ApacheDSController.new(java_in, java_out, self)
+      @comm_threads.add(@controller.start)
+
+      trace "- Waiting for server to start"
+      until @controller.started? || @controller.error?
         sleep 0.5
       end
 
+      if @controller.error?
+        self.stop
+        raise "LDAP server failed to start"
+      end
+
+      trace "- Server started successfully"
       at_exit { stop }
 
       self
     end
 
     def stop
-      @java_in.puts("STOP")
+      @controller.stop if @controller
+      @comm_threads.list.each { |t| t.join } if @comm_threads
+      @running = false
     end
 
-    private
+    def log_error(msg)
+      $stderr.puts(msg)
+    end
 
     def log(msg)
       $stderr.puts(msg) unless quiet
@@ -107,12 +121,14 @@ module Ladle
       $stderr.puts(msg) if verbose && !quiet
     end
 
+    private
+
     def server_cmd
-      [
+      ([
         "java",
         "-cp", classpath,
         "net.detailedbalance.ladle.Main"
-      ].join(' ')
+      ] + @additional_args).join(' ')
     end
 
     def classpath
@@ -122,6 +138,103 @@ module Ladle
         # Wrapper code
         [File.expand_path("../java", __FILE__)]
       ).join(':')
+    end
+
+    ##
+    # Encapsulates communication with the child ApacheDS process.
+    class ApacheDSController
+      def initialize(ds_in, ds_out, server)
+        @ds_in = ds_in
+        @ds_out = ds_out
+        @server = server
+      end
+
+      def start
+        Thread.new(self) do |controller|
+          controller.watch
+        end
+      end
+
+      def watch
+        while (line = @ds_out.readline) && !error?
+          case line
+          when /^STARTED/
+            @started = true
+          when /^FATAL/
+            report_error(line)
+          when /^STOPPED/
+            @started = false
+          else
+            report_error("Unexpected server process output: #{line}")
+          end
+        end
+      end
+
+      def started?
+        @started
+      end
+
+      def error?
+        @error
+      end
+
+      def stop
+        @ds_in.puts("STOP") unless @ds_in.closed?
+        @ds_out.close unless @ds_out.closed?
+        @ds_in.close unless @ds_in.closed?
+      end
+
+      private
+
+      def report_error(msg)
+        @error = true
+        @server.log_error "ApacheDS process failed: #{msg}"
+        self.stop
+      end
+    end
+
+    class LogStreamWatcher
+      def initialize(ds_err, server)
+        @ds_err = ds_err
+        @server = server
+      end
+
+      def start
+        Thread.new(self) do |watcher|
+          watcher.watch
+        end
+      end
+
+      def watch
+        begin
+          while !@ds_err.closed? && (line = @ds_err.readline)
+            if is_error?(line)
+              @server.log_error("ApacheDS: #{line}")
+            else
+              @server.trace("ApacheDS: #{line}")
+            end
+          end
+        rescue EOFError
+          # stop naturally
+        end
+      end
+
+      private
+
+      def is_error?(line)
+        kind = (line =~ /^([A-Z]+):/) ? $1 : nil
+        (kind.nil? || %w(ERROR WARN).include?(kind)) && !bogus?(line)
+      end
+
+      ##
+      # Indicates whether the "error" or "warning" emitted from
+      # ApacheDS is actually an error or warning.
+      def bogus?(line)
+        [
+          %r{shutdown hook has NOT been registered},
+          %r{attributeType w/ OID 2.5.4.16 not registered}
+        ].detect { |re| line =~ re }
+      end
     end
   end
 end

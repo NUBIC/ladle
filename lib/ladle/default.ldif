@@ -1,3 +1,5 @@
+version: 1
+
 dn: ou=people,dc=example,dc=org
 objectClass: top
 objectClass: organizationalUnit

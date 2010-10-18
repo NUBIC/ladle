@@ -48,7 +48,7 @@ describe Ladle, "::Server" do
     end
   end
 
-  describe "#start" do
+  describe "running" do
     before do
       @server = Ladle::Server.new
     end
@@ -65,6 +65,24 @@ describe Ladle, "::Server" do
 
     it "returns the server object" do
       @server.start.should be(@server)
+    end
+
+    it "is safe to invoke twice (in the same thread)" do
+      @server.start
+      lambda { @server.start }.should_not raise_error
+    end
+
+    it "can be stopped then started again" do
+      @server.start
+      @server.stop
+      @server.start
+      lambda { TCPSocket.new('localhost', @server.port) }.
+        should_not raise_error
+    end
+
+    it "throws an exception when the server doesn't start up" do
+      @server = Ladle::Server.new(:more_args => ["--fail", "before_start"])
+      lambda { @server.start }.should raise_error(/LDAP server failed to start/)
     end
 
     it "should use the right port"
