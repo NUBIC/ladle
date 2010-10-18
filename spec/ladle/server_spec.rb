@@ -3,6 +3,10 @@ require File.expand_path("../../spec_helper.rb", __FILE__)
 # require 'net/ldap'
 
 describe Ladle, "::Server" do
+  def create_server(opts = {})
+    Ladle::Server.new({ :quiet => true }.merge(opts))
+  end
+
   describe "initialization of" do
     describe ":port" do
       it "defaults to 3897" do
@@ -66,21 +70,35 @@ describe Ladle, "::Server" do
         Ladle::Server.new(:quiet => true).quiet?.should be_true
       end
     end
+
+    describe ":timeout" do
+      it "defaults to 15 seconds" do
+        Ladle::Server.new.timeout.should == 15
+      end
+
+      it "can be overridden" do
+        Ladle::Server.new(:timeout => 27).timeout.should == 27
+      end
+    end
   end
 
   describe "running" do
     before do
-      @server = Ladle::Server.new(:quiet => true)
+      @server = create_server
     end
 
     after do
       @server.stop
     end
 
-    it "should block until the server is up" do
-      @server.start
+    def should_be_running
       lambda { TCPSocket.new('localhost', @server.port) }.
         should_not raise_error
+    end
+
+    it "should block until the server is up" do
+      @server.start
+      should_be_running
     end
 
     it "returns the server object" do
@@ -101,11 +119,25 @@ describe Ladle, "::Server" do
     end
 
     it "throws an exception when the server doesn't start up" do
-      @server = Ladle::Server.new(:more_args => ["--fail", "before_start"], :quiet => true)
+      old_stderr, $stderr = $stderr, StringIO.new
+
+      @server = create_server(:more_args => ["--fail", "before_start"])
       lambda { @server.start }.should raise_error(/LDAP server failed to start/)
+      $stderr.string.should == "ApacheDS process failed: FATAL: Expected failure for testing\n"
+
+      $stderr = old_stderr
     end
 
-    it "should use the right port"
-    it "should use the specified data"
+    it "times out after the specified interval" do
+      @server = create_server(:timeout => 3, :more_args => %w(--fail timeout6))
+      lambda { @server.start }.
+        should raise_error(/LDAP server startup did not complete within 3 seconds/)
+    end
+
+    it "should use the specified port" do
+      pending "TODO"
+      @server = create_server(:port => 45678).start
+      should_be_running
+    end
   end
 end

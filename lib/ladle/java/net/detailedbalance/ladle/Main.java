@@ -31,9 +31,13 @@ public class Main {
         CommandLine commandLine = parseArgs(args);
 
         try {
-            if (commandLine.hasOption('F') && "before_start".equals(commandLine.getOptionValue('F'))) {
-                reportError("Expected failure for testing");
-                System.exit(207);
+            if (commandLine.hasOption('F')) {
+                if ("before_start".equals(commandLine.getOptionValue('F'))) {
+                    reportError("Expected failure for testing");
+                    System.exit(207);
+                } else if ("timeout6".equals(commandLine.getOptionValue('F'))) {
+                    Thread.sleep(6000);
+                }
             }
 
             final Server s = new Server(3897, "dc=example,dc=org",

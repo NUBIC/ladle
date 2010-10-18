@@ -41,13 +41,15 @@ module Ladle
     # @option opts [Boolean] :quiet (false) if true _no_ information
     #   about regular execution will be printed.  Error information
     #   will still be printed.  This trumps `:verbose`.
+    # @option opts [Fixnum] :timeout (15) the amount of time to wait
+    #   (seconds) for the server process to start before giving up.
     def initialize(opts={})
       @port = opts[:port] || 3897
       @domain = opts[:domain] || "dc=example,dc=org"
       @ldif = opts[:ldif] || File.expand_path("../default.ldif", __FILE__)
       @quiet = opts[:quiet]
       @verbose = opts[:verbose]
-      @timeout = 30
+      @timeout = opts[:timeout] || 15
 
       # Additional arguments that can be passed to the java server
       # process.  Used for testing only, so not documented.
@@ -76,19 +78,26 @@ module Ladle
       java_in, java_out, java_err = Open3.popen3(server_cmd)
       @running = true
 
-      @comm_threads = ThreadGroup.new
-      @comm_threads.add(LogStreamWatcher.new(java_err, self).start)
+      @log_watcher = LogStreamWatcher.new(java_err, self)
+      @log_watcher.start
       @controller = ApacheDSController.new(java_in, java_out, self)
-      @comm_threads.add(@controller.start)
+      @controller.start
 
       trace "- Waiting for server to start"
-      until @controller.started? || @controller.error?
+      started_waiting = Time.now
+      until @controller.started? || @controller.error? || Time.now > started_waiting + timeout
+        trace "- #{Time.now - started_waiting} seconds elapsed"
         sleep 0.5
       end
+      trace "- Stopped waiting after #{Time.now - started_waiting} seconds"
 
       if @controller.error?
         self.stop
         raise "LDAP server failed to start"
+      elsif !@controller.started?
+        self.stop
+        trace "- Timed out"
+        raise "LDAP server startup did not complete within #{timeout} seconds"
       end
 
       trace "- Server started successfully"
@@ -100,8 +109,12 @@ module Ladle
     ##
     # Stops the server that was started with {#start}.
     def stop
+      log "Stopping server on #{port}"
+      trace "- stopping server process"
       @controller.stop if @controller
-      @comm_threads.list.each { |t| t.join } if @comm_threads
+      trace "- stopping log watcher"
+      @log_watcher.stop
+
       @running = false
     end
 
@@ -204,9 +217,12 @@ module Ladle
       end
 
       def stop
-        @ds_in.puts("STOP") unless @ds_in.closed?
+        unless @ds_in.closed?
+          @ds_in.puts("STOP")
+          @ds_in.flush
+          @ds_in.close
+        end
         @ds_out.close unless @ds_out.closed?
-        @ds_in.close unless @ds_in.closed?
       end
 
       private
@@ -242,6 +258,10 @@ module Ladle
         rescue EOFError
           # stop naturally
         end
+      end
+
+      def stop
+        @ds_err.close unless @ds_err.closed?
       end
 
       private
