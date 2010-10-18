@@ -113,8 +113,6 @@ module Ladle
       log "Stopping server on #{port}"
       trace "- stopping server process"
       @controller.stop if @controller
-      trace "- stopping log watcher"
-      @log_watcher.stop if @log_watcher
 
       if @pid
         trace "- killing server process #{@pid} (if not already stopped)"
@@ -239,7 +237,6 @@ module Ladle
           @ds_in.flush
           @ds_in.close
         end
-        @ds_out.close unless @ds_out.closed?
       end
 
       private
@@ -275,10 +272,6 @@ module Ladle
         rescue EOFError
           # stop naturally
         end
-      end
-
-      def stop
-        @ds_err.close unless @ds_err.closed?
       end
 
       private
