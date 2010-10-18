@@ -32,12 +32,7 @@ public class Main {
 
         try {
             if (commandLine.hasOption('F')) {
-                if ("before_start".equals(commandLine.getOptionValue('F'))) {
-                    reportError("Expected failure for testing");
-                    System.exit(207);
-                } else if ("timeout6".equals(commandLine.getOptionValue('F'))) {
-                    Thread.sleep(6000);
-                }
+                behaveBadly(commandLine.getOptionValue('F'));
             }
 
             final Server s = new Server(3897, "dc=example,dc=org",
@@ -75,6 +70,16 @@ public class Main {
         } catch (IOException e) {
             reportError(e);
             System.exit(3);
+        }
+    }
+
+    @SuppressWarnings({ "InfiniteLoopStatement" })
+    private static void behaveBadly(String desiredFailureType) throws InterruptedException {
+        if ("before_start".equals(desiredFailureType)) {
+            reportError("Expected failure for testing");
+            System.exit(207);
+        } else if ("hang".equals(desiredFailureType)) {
+            while (true) { Thread.sleep(1000); }
         }
     }
 

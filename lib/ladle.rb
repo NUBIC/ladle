@@ -7,4 +7,6 @@
 module Ladle
   autoload :VERSION, "ladle/version"
   autoload :Server, "ladle/server"
+
+  autoload :RubyAdapter, "ladle/ruby_adapter"
 end

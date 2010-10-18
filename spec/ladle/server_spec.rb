@@ -89,6 +89,15 @@ describe Ladle, "::Server" do
 
     after do
       @server.stop
+
+      # should do nothing
+      left_over_pids = `ps auxww`.split("\n").grep(/net.detailedbalance.ladle.Main/).
+        collect { |line| line.split(/\s+/)[1].to_i }
+      left_over_pids.each { |pid|
+        $stderr.puts "Killing leftover process #{pid}"
+        Process.kill 15, pid
+      }
+      left_over_pids.should be_empty
     end
 
     def should_be_running
@@ -96,7 +105,7 @@ describe Ladle, "::Server" do
         should_not raise_error
     end
 
-    it "should block until the server is up" do
+    it "blocks until the server is up" do
       @server.start
       should_be_running
     end
@@ -129,7 +138,7 @@ describe Ladle, "::Server" do
     end
 
     it "times out after the specified interval" do
-      @server = create_server(:timeout => 3, :more_args => %w(--fail timeout6))
+      @server = create_server(:timeout => 3, :more_args => %w(--fail hang))
       lambda { @server.start }.
         should raise_error(/LDAP server startup did not complete within 3 seconds/)
     end

@@ -75,7 +75,7 @@ module Ladle
       return if @running
       log "Starting server on #{port}"
       trace "- Server command: #{server_cmd}"
-      java_in, java_out, java_err = Open3.popen3(server_cmd)
+      @pid, java_in, java_out, java_err = strategy.popen4(server_cmd)
       @running = true
 
       @log_watcher = LogStreamWatcher.new(java_err, self)
@@ -109,11 +109,24 @@ module Ladle
     ##
     # Stops the server that was started with {#start}.
     def stop
+      return if !@running
       log "Stopping server on #{port}"
       trace "- stopping server process"
       @controller.stop if @controller
       trace "- stopping log watcher"
-      @log_watcher.stop
+      @log_watcher.stop if @log_watcher
+
+      if @pid
+        trace "- killing server process #{@pid} (if not already stopped)"
+        begin
+          Process.kill "TERM", @pid
+          trace "  * term sent"
+          Process.waitpid2 @pid
+          trace "  * gone"
+        rescue Errno::ESRCH
+          trace "  * was already dead"
+        end
+      end
 
       @running = false
     end
@@ -157,6 +170,10 @@ module Ladle
     # @return [Boolean]
     def verbose?
       @verbose
+    end
+
+    def strategy
+      Ladle::RubyAdapter
     end
 
     private
