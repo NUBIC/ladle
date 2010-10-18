@@ -55,7 +55,7 @@ block, then stop it in an `after` block:
 
     describe "directory access" do
       before do
-        @ldap_server = Ladle::Server.new.start
+        @ldap_server = Ladle::Server.new(:quiet => true).start
       end
 
       after do

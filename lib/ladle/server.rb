@@ -21,18 +21,6 @@ module Ladle
     attr_reader :ldif
 
     ##
-    # If the controller will print anything about what it is doing to
-    # stderr.
-    # @return [Boolean]
-    attr_reader :quiet
-
-    ##
-    # Whether the controller will print detailed information about
-    # what it is doing to stderr.
-    # @return [Boolean]
-    attr_reader :verbose
-
-    ##
     # The time to wait for the server to start up before giving up
     # (seconds).
     # @return [Fixnum]
@@ -47,12 +35,18 @@ module Ladle
     #   :domain option to match.
     # @option opts [String] :domain ("dc=example,dc=org") the domain
     #   for the data provided in the :ldif option.
+    # @option opts [Boolean] :verbose (false) if true, detailed
+    #   information about the execution of the server will be printed
+    #   to standard error.
+    # @option opts [Boolean] :quiet (false) if true _no_ information
+    #   about regular execution will be printed.  Error information
+    #   will still be printed.  This trumps `:verbose`.
     def initialize(opts={})
       @port = opts[:port] || 3897
       @domain = opts[:domain] || "dc=example,dc=org"
       @ldif = opts[:ldif] || File.expand_path("../default.ldif", __FILE__)
-      @quiet = false
-      @verbose = true
+      @quiet = opts[:quiet]
+      @verbose = opts[:verbose]
       @timeout = 30
 
       # Additional arguments that can be passed to the java server
@@ -103,22 +97,53 @@ module Ladle
       self
     end
 
+    ##
+    # Stops the server that was started with {#start}.
     def stop
       @controller.stop if @controller
       @comm_threads.list.each { |t| t.join } if @comm_threads
       @running = false
     end
 
+    ##
+    # Visible for collaborators.
+    # @private
     def log_error(msg)
       $stderr.puts(msg)
     end
 
+    ##
+    # Visible for collaborators.
+    # @private
     def log(msg)
-      $stderr.puts(msg) unless quiet
+      $stderr.puts(msg) unless quiet?
     end
 
+    ##
+    # Visible for collaborators.
+    # @private
     def trace(msg)
-      $stderr.puts(msg) if verbose && !quiet
+      $stderr.puts(msg) if verbose? && !quiet?
+    end
+
+    ##
+    # If the controller will print anything about what it is doing to
+    # stderr.  If this is true, all non-error output will be
+    # supressed.  This value trumps {#verbose?}.
+    #
+    # @return [Boolean]
+    def quiet?
+      @quiet
+    end
+
+    ##
+    # Whether the controller will print detailed information about
+    # what it is doing to stderr.  This includes information from the
+    # embedded ApacheDS instance.
+    #
+    # @return [Boolean]
+    def verbose?
+      @verbose
     end
 
     private

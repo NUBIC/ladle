@@ -46,11 +46,31 @@ describe Ladle, "::Server" do
           should raise_error("Cannot read specified LDIF file foo/bar.ldif.")
       end
     end
+
+    describe ":verbose" do
+      it "defaults to false" do
+        Ladle::Server.new.verbose?.should be_false
+      end
+
+      it "can be overridden" do
+        Ladle::Server.new(:verbose => true).verbose?.should be_true
+      end
+    end
+
+    describe ":quiet" do
+      it "defaults to false" do
+        Ladle::Server.new.quiet?.should be_false
+      end
+
+      it "can be overridden" do
+        Ladle::Server.new(:quiet => true).quiet?.should be_true
+      end
+    end
   end
 
   describe "running" do
     before do
-      @server = Ladle::Server.new
+      @server = Ladle::Server.new(:quiet => true)
     end
 
     after do
@@ -81,7 +101,7 @@ describe Ladle, "::Server" do
     end
 
     it "throws an exception when the server doesn't start up" do
-      @server = Ladle::Server.new(:more_args => ["--fail", "before_start"])
+      @server = Ladle::Server.new(:more_args => ["--fail", "before_start"], :quiet => true)
       lambda { @server.start }.should raise_error(/LDAP server failed to start/)
     end
 
