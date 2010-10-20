@@ -20,7 +20,8 @@ import java.io.PrintWriter;
 /**
  * The executable front-end to {@link Server}.  Uses stdin/stdout as a control channel, with
  * tracing info printed to stderr. The arguments expected and the control channel contents are
- * tightly bound to the ruby controller code in <code>lib/ladle/server.rb</code>.
+ * tightly bound to the ruby controller code in <code>lib/ladle/server.rb</code>.  There is no
+ * validation for form at this level -- it's all done in ruby.
  *
  * @author Rhett Sutphin
  */

@@ -1,10 +1,26 @@
 require File.expand_path("../../spec_helper.rb", __FILE__)
 
-# require 'net/ldap'
+require 'net/ldap'
 
 describe Ladle, "::Server" do
   def create_server(opts = {})
     Ladle::Server.new({ :quiet => true }.merge(opts))
+  end
+
+  before do
+    @server = create_server
+  end
+
+  after do
+    @server.stop
+
+    left_over_pids = `ps`.split("\n").grep(/net.detailedbalance.ladle.Main/).
+      collect { |line| line.split(/\s+/)[0].to_i }
+    left_over_pids.each { |pid|
+      $stderr.puts "Killing leftover process #{pid}"
+      Process.kill 15, pid
+    }
+    left_over_pids.should be_empty
   end
 
   describe "initialization of" do
@@ -83,22 +99,6 @@ describe Ladle, "::Server" do
   end
 
   describe "running" do
-    before do
-      @server = create_server
-    end
-
-    after do
-      @server.stop
-
-      left_over_pids = `ps`.split("\n").grep(/net.detailedbalance.ladle.Main/).
-        collect { |line| line.split(/\s+/)[0].to_i }
-      left_over_pids.each { |pid|
-        $stderr.puts "Killing leftover process #{pid}"
-        Process.kill 15, pid
-      }
-      left_over_pids.should be_empty
-    end
-
     def should_be_running
       lambda { TCPSocket.new('localhost', @server.port) }.
         should_not raise_error
@@ -145,6 +145,38 @@ describe Ladle, "::Server" do
     it "should use the specified port" do
       @server = create_server(:port => 45678).start
       should_be_running
+    end
+  end
+
+  describe "data" do
+    def with_ldap
+      @server.start
+      Net::LDAP.open(ldap_parameters) do |ldap|
+        yield ldap
+      end
+    end
+
+    def ldap_parameters
+      @ldap_parameters ||= {
+        :host => 'localhost', :port => @server.port,
+        :auth => { :method => :anonymous }
+      }
+    end
+
+    describe "the default set" do
+      it "has 26 people" do
+        pending "ApacheDS 1.5.5 doesn't work with Net::LDAP#search"
+        with_ldap { |ldap|
+          ldap.search(
+            :base => 'dc=example,dc=org',
+            :filter => Net::LDAP::Filter.eq('uid', 'mm')
+          )
+        }.should have(26).results
+      end
+
+      it "has 1 group" do
+        pending "TODO"
+      end
     end
   end
 end
