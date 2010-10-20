@@ -74,29 +74,32 @@ module Ladle
     def start
       return if @running
       log "Starting server on #{port}"
-      trace "- Server command: #{server_cmd}"
-      @pid, java_in, java_out, java_err = strategy.popen4(server_cmd)
+      trace "- Server command: #{server_cmd.inspect}"
+      java_in, java_out, java_err = create_process(*server_cmd).popen
       @running = true
+      trace "- Started subprocess #{process.pid}"
 
       @log_watcher = LogStreamWatcher.new(java_err, self)
       @log_watcher.start
       @controller = ApacheDSController.new(java_in, java_out, self)
       @controller.start
 
+      # TODO: perhaps this busywait can be replaced with select?
       trace "- Waiting for server to start"
       started_waiting = Time.now
       until @controller.started? || @controller.error? || Time.now > started_waiting + timeout
-        trace "- #{Time.now - started_waiting} seconds elapsed"
+        trace "  . waited #{Time.now - started_waiting} seconds"
         sleep 0.5
       end
       trace "- Stopped waiting after #{Time.now - started_waiting} seconds"
 
       if @controller.error?
         self.stop
+        trace "! Subprocess error (see above)"
         raise "LDAP server failed to start"
       elsif !@controller.started?
         self.stop
-        trace "- Timed out"
+        trace "! Timed out"
         raise "LDAP server startup did not complete within #{timeout} seconds"
       end
 
@@ -111,20 +114,12 @@ module Ladle
     def stop
       return if !@running
       log "Stopping server on #{port}"
-      trace "- stopping server process"
+      trace "- Stopping server process"
       @controller.stop if @controller
 
-      if @pid
-        trace "- killing server process #{@pid} (if not already stopped)"
-        begin
-          Process.kill "TERM", @pid
-          trace "  * term sent"
-          Process.waitpid2 @pid
-          trace "  * gone"
-        rescue Errno::ESRCH
-          trace "  * was already dead"
-        end
-      end
+      trace "- Signalling server process to stop if not already stopped"
+      process.stop_gracefully
+      process.wait
 
       @running = false
     end
@@ -170,18 +165,27 @@ module Ladle
       @verbose
     end
 
-    def strategy
-      Ladle::RubyAdapter
-    end
-
     private
 
+    def create_process(*cmd)
+      @process =
+        if RUBY_PLATFORM == 'java'
+          JRubyProcess.new(*cmd)
+        else
+          RubyProcess.new(*cmd)
+        end
+    end
+
+    def process
+      @process
+    end
+
     def server_cmd
-      ([
+      [
         "java",
         "-cp", classpath,
         "net.detailedbalance.ladle.Main"
-      ] + @additional_args).join(' ')
+      ] + @additional_args
     end
 
     def classpath

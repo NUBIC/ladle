@@ -90,9 +90,8 @@ describe Ladle, "::Server" do
     after do
       @server.stop
 
-      # should do nothing
-      left_over_pids = `ps auxww`.split("\n").grep(/net.detailedbalance.ladle.Main/).
-        collect { |line| line.split(/\s+/)[1].to_i }
+      left_over_pids = `ps`.split("\n").grep(/net.detailedbalance.ladle.Main/).
+        collect { |line| line.split(/\s+/)[0].to_i }
       left_over_pids.each { |pid|
         $stderr.puts "Killing leftover process #{pid}"
         Process.kill 15, pid

@@ -6,7 +6,8 @@
 # This is the namespace for Ladle's implementation.
 module Ladle
   autoload :VERSION, "ladle/version"
-  autoload :Server, "ladle/server"
+  autoload :Server,  "ladle/server"
 
-  autoload :RubyAdapter, "ladle/ruby_adapter"
+  autoload :RubyProcess,  "ladle/ruby_process"
+  autoload :JRubyProcess, "ladle/jruby_process"
 end
