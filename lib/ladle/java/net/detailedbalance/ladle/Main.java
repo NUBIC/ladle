@@ -35,8 +35,11 @@ public class Main {
                 behaveBadly(commandLine.getOptionValue('F'));
             }
 
-            final Server s = new Server(3897, "dc=example,dc=org",
-                new File("lib/ladle/default.ldif"), new File("/tmp"));
+            final Server s = new Server(
+                new Integer(commandLine.getOptionValue("port")),
+                "dc=example,dc=org",
+                new File("lib/ladle/default.ldif"),
+                new File("/tmp"));
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 public void run() {
@@ -88,8 +91,12 @@ public class Main {
         Options options = new Options()
             .addOption(OptionBuilder.
                 withLongOpt("fail").hasArg().
-                    withDescription("Force a failure (for testing)").
-                create('F'));
+                withDescription("Force a failure (for testing)").
+                create('F'))
+            .addOption(OptionBuilder.
+                withLongOpt("port").hasArg().isRequired().
+                withDescription("Specify port to use").
+                create('p'));
         CommandLineParser parser = new GnuParser();
 
         try {

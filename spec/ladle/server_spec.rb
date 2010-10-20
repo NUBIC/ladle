@@ -143,7 +143,6 @@ describe Ladle, "::Server" do
     end
 
     it "should use the specified port" do
-      pending "TODO"
       @server = create_server(:port => 45678).start
       should_be_running
     end

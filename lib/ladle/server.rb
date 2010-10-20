@@ -184,7 +184,8 @@ module Ladle
       [
         "java",
         "-cp", classpath,
-        "net.detailedbalance.ladle.Main"
+        "net.detailedbalance.ladle.Main",
+        "--port", port
       ] + @additional_args
     end
 

@@ -20,7 +20,7 @@ module Ladle
     def popen
       # You can't wait for the PID returned by JRuby's IO.popen4, so
       # this is necessary.
-      cmd = @command_and_args.to_java(:string)
+      cmd = @command_and_args.collect(&:to_s).to_java(:string)
       @process = Java::JavaLang::ProcessBuilder.new(
         cmd
       ).start
