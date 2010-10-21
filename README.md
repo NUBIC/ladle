@@ -10,9 +10,9 @@ any sort of client application -- anything that communicates over the
 standard LDAP protocol.
 
 Ladle itself is tested on both JRuby 1.5.2 and Ruby 1.8.7 and 1.9.1.
-It is a wrapper around [ApacheDS][] (a pure-java embeddable LDAP [and
-other directory services] server), so it needs Java 1.5 or later
-available whether you are using JRuby or not.
+It is a wrapper around [ApacheDS][] (a pure-java embeddable LDAP
+server), so it needs Java 1.5 or later available whether you are using
+JRuby or not.
 
 [ApacheDS]: http://directory.apache.org/apacheds/1.5/index.html
 
@@ -41,7 +41,7 @@ Ladle with a test framework
 ---------------------------
 
 Depending on what you're doing, you might want to run one
-`Ladle::Server` for all your tests, or have a clean one for each test.
+{Ladle::Server} for all your tests, or have a clean one for each test.
 Since it takes a few seconds to spin up the server, if you are only
 reading from the server, it makes sense to use one for all your tests.
 If you are doing writes, a separate server for each test is safer.
@@ -71,7 +71,28 @@ For a shared server, use `before(:all)` and `after(:all)` instead.
 
 ### Cucumber
 
-**TODO**
+To use a server per test, use Cucumber's `Around` [hook][cucumber-hooks]:
+
+    Around('@ldap') do |scenario, block|
+      ladle = Ladle::Server.new(:quiet => true).start
+      block.call
+      ladle.stop
+    end
+
+If you want just one server, consider something like this:
+
+    Before('@ldap') do
+      @ladle ||= Ladle::Server.new(:quiet => true).start
+    end
+
+This will start up a server for the first feature which needs it (and
+has indicated that with the `@ldap` tag).  The server will remain
+running for all subsequent features and automatically shut down at the
+end of the run.  (Cucumber's hooks documentation notes that you would,
+in general, need to register an `at_exit` block for the process to be
+torn down at the end.  {Ladle::Server#start} does this automatically.)
+
+[cucumber-hooks]: http://github.com/aslakhellesoy/cucumber/wiki/hooks
 
 Test data
 ---------
