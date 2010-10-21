@@ -200,6 +200,10 @@ describe Ladle, "::Server" do
   end
 
   describe "data" do
+    before do
+      pending "Net::LDAP doesn't work on 1.9" if RUBY_VERSION =~ /1.9/
+    end
+
     def with_ldap
       @server.start
       Net::LDAP.open(ldap_parameters) do |ldap|
