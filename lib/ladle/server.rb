@@ -292,7 +292,10 @@ module Ladle
       def bogus?(line)
         [
           %r{shutdown hook has NOT been registered},
-          %r{attributeType w/ OID 2.5.4.16 not registered}
+          %r{attributeType w/ OID 2.5.4.16 not registered},
+          %r{default.*?cache size},
+          %r{change the admin password},
+          %r{Attribute \S+ does not have normalizer}
         ].detect { |re| line =~ re }
       end
     end
