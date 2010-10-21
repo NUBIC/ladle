@@ -4,7 +4,7 @@ require 'net/ldap'
 
 describe Ladle, "::Server" do
   def create_server(opts = {})
-    Ladle::Server.new({ :quiet => true }.merge(opts))
+    Ladle::Server.new({ :quiet => true, :tmpdir => tmpdir }.merge(opts))
   end
 
   before do
@@ -96,6 +96,44 @@ describe Ladle, "::Server" do
         Ladle::Server.new(:timeout => 27).timeout.should == 27
       end
     end
+
+    describe ":tmpdir" do
+      before do
+        @old_env = %w(TMPDIR TEMPDIR).inject({}) { |e, k| e[k] = ENV[k]; e }
+        @old_env.keys.each { |k| ENV[k] = nil }
+      end
+
+      after do
+        @old_env.each { |k, v| ENV[k] = v }
+      end
+
+      it "defaults to TMPDIR if set" do
+        ENV["TMPDIR"] = tmpdir('foo')
+        Ladle::Server.new.tmpdir.should == tmpdir('foo')
+      end
+
+      it "defaults to TEMPDIR if set" do
+        ENV["TEMPDIR"] = tmpdir('baz')
+        Ladle::Server.new.tmpdir.should == tmpdir('baz')
+      end
+
+      it "prefers the explicitly provided value" do
+        ENV["TMPDIR"] = tmpdir('quux')
+        ENV["TEMPDIR"] = tmpdir('bar')
+        Ladle::Server.new(:tmpdir => tmpdir('zap')).tmpdir.
+          should == tmpdir('zap')
+      end
+
+      it "must exist" do
+        lambda { Ladle::Server.new(:tmpdir => 'whatever') }.
+          should raise_error(/Tmpdir "whatever" does not exist./)
+      end
+
+      it "must be specified somehow" do
+        lambda { Ladle::Server.new }.
+          should raise_error(/Cannot guess tmpdir from the environment.  Please specify it./)
+      end
+    end
   end
 
   describe "running" do
@@ -145,6 +183,19 @@ describe Ladle, "::Server" do
     it "should use the specified port" do
       @server = create_server(:port => 45678).start
       should_be_running
+    end
+
+    it "uses the specified tmpdir" do
+      target = tmpdir('baz')
+      @server = create_server(:tmpdir => target).start
+      Dir["#{target}/ladle-server-*"].size.should == 1
+    end
+
+    it "cleans up the tmpdir afterward" do
+      target = tmpdir('quux')
+      @server = create_server(:tmpdir => target).start
+      @server.stop
+      Dir["#{target}/ladle-server-*"].size.should == 0
     end
   end
 

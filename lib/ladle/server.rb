@@ -27,6 +27,13 @@ module Ladle
     attr_reader :timeout
 
     ##
+    # The base directory into which the server should write its
+    # temporary files.  Ladle will create a directory under this path
+    # on startup and remove it on shutdown.
+    # @return [String]
+    attr_reader :tmpdir
+
+    ##
     # @param [Hash] opts the options for the server
     # @option opts [Fixnum] :port (3897) The port to serve from.
     # @option opts [String] :ldif ({path to the gem}/lib/ladle/default.ldif)
@@ -43,6 +50,10 @@ module Ladle
     #   will still be printed.  This trumps `:verbose`.
     # @option opts [Fixnum] :timeout (15) the amount of time to wait
     #   (seconds) for the server process to start before giving up.
+    # @option opts [String] :tmpdir (ENV['TMPDIR'] or ENV['TEMPDIR'])
+    #   the temporary directory to use for the server's files.  If not
+    #   guessable from the environment, it must be specified.  It must
+    #   already exist.
     def initialize(opts={})
       @port = opts[:port] || 3897
       @domain = opts[:domain] || "dc=example,dc=org"
@@ -50,6 +61,7 @@ module Ladle
       @quiet = opts[:quiet]
       @verbose = opts[:verbose]
       @timeout = opts[:timeout] || 15
+      @tmpdir = opts[:tmpdir] || ENV['TMPDIR'] || ENV['TEMPDIR']
 
       # Additional arguments that can be passed to the java server
       # process.  Used for testing only, so not documented.
@@ -57,6 +69,12 @@ module Ladle
 
       unless @domain =~ /^dc=/
         raise "The domain component must start with 'dc='.  '#{@domain}' does not."
+      end
+
+      if tmpdir.nil?
+        raise "Cannot guess tmpdir from the environment.  Please specify it."
+      elsif !File.directory?(tmpdir)
+        raise "Tmpdir #{tmpdir.inspect} does not exist."
       end
 
       unless File.readable?(@ldif)
@@ -187,7 +205,8 @@ module Ladle
         "net.detailedbalance.ladle.Main",
         "--port", port,
         "--domain", domain,
-        "--ldif", ldif
+        "--ldif", ldif,
+        "--tmpdir", tmpdir
       ] + @additional_args
     end
 

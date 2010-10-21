@@ -40,7 +40,7 @@ public class Main {
                 new Integer(commandLine.getOptionValue("p")),
                 commandLine.getOptionValue("d"),
                 new File(commandLine.getOptionValue("l")),
-                new File("/tmp"));
+                new File(commandLine.getOptionValue("t")));
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 public void run() {
@@ -106,6 +106,10 @@ public class Main {
                 withLongOpt("ldif").hasArg().isRequired().
                 withDescription("Specify the LDIF data to load").
                 create('l'))
+            .addOption(OptionBuilder.
+                withLongOpt("tmpdir").hasArg().isRequired().
+                withDescription("Specify the temporary directory to use").
+                create('t'))
             ;
         CommandLineParser parser = new GnuParser();
 

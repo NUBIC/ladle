@@ -9,12 +9,11 @@ require 'ladle'
 
 module Ladle::RSpec
   module Tmpdir
-    def tmpdir
-      @tmpdir ||= begin
-                    name = File.expand_path("../../tmp/specs", __FILE__)
-                    FileUtils.mkdir_p name
-                    name
-                  end
+    def tmpdir(path=nil)
+      @tmpdir ||= File.expand_path("../../tmp/specs", __FILE__)
+      full = path ? File.join(@tmpdir, path) : @tmpdir
+      FileUtils.mkdir_p full
+      full
     end
 
     def rm_tmpdir
