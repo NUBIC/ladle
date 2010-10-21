@@ -1,0 +1,28 @@
+version: 1
+
+dn: ou=animals,dc=example,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: animals
+
+dn: uid=aa927,ou=animals,dc=example,dc=net
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Ada Aardvark
+sn: Aardvark
+givenName: Ada
+mail: ada@example.net
+uid: aa927
+
+dn: uid=bb954,ou=animals,dc=example,dc=net
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Bob Badger
+sn: Badger
+givenName: Bob
+mail: badger@example.net
+uid: bb954

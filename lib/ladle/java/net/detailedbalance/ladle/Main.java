@@ -38,8 +38,8 @@ public class Main {
 
             final Server s = new Server(
                 new Integer(commandLine.getOptionValue("p")),
-                "dc=example,dc=org",
-                new File("lib/ladle/default.ldif"),
+                commandLine.getOptionValue("d"),
+                new File(commandLine.getOptionValue("l")),
                 new File("/tmp"));
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -97,7 +97,16 @@ public class Main {
             .addOption(OptionBuilder.
                 withLongOpt("port").hasArg().isRequired().
                 withDescription("Specify port to use").
-                create('p'));
+                create('p'))
+            .addOption(OptionBuilder.
+                withLongOpt("domain").hasArg().isRequired().
+                withDescription("Specify the domain (e.g., dc=example,dc=com)").
+                create('d'))
+            .addOption(OptionBuilder.
+                withLongOpt("ldif").hasArg().isRequired().
+                withDescription("Specify the LDIF data to load").
+                create('l'))
+            ;
         CommandLineParser parser = new GnuParser();
 
         try {

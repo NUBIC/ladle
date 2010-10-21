@@ -196,5 +196,24 @@ describe Ladle, "::Server" do
           collect { |res| res[:uid].first }.should == %w(jj243)
       end
     end
+
+    describe "with a provided set" do
+      before do
+        @server = create_server(
+          :domain => "dc=example,dc=net",
+          :ldif => File.expand_path("../animals.ldif", __FILE__)
+        )
+      end
+
+      it "has the groups provided by the other LDIF" do
+        ldap_search(Net::LDAP::Filter.pres('ou'), 'dc=example,dc=net').
+          collect { |result| result[:ou].first }.should == ["animals"]
+      end
+
+      it "has the individuals provided by the other LDIF" do
+        ldap_search(Net::LDAP::Filter.pres('uid'), 'dc=example,dc=net').
+          collect { |result| result[:givenname].first }.sort.should == %w(Ada Bob)
+      end
+    end
   end
 end

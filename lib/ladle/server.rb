@@ -185,7 +185,9 @@ module Ladle
         "java",
         "-cp", classpath,
         "net.detailedbalance.ladle.Main",
-        "--port", port
+        "--port", port,
+        "--domain", domain,
+        "--ldif", ldif
       ] + @additional_args
     end
 
