@@ -34,6 +34,11 @@ module Ladle
     attr_reader :tmpdir
 
     ##
+    # The java executable to use to run the embedded server.
+    # @return [String]
+    attr_reader :java_bin
+
+    ##
     # @param [Hash] opts the options for the server
     # @option opts [Fixnum] :port (3897) The port to serve from.
     # @option opts [String] :ldif ({path to the gem}/lib/ladle/default.ldif)
@@ -54,6 +59,9 @@ module Ladle
     #   the temporary directory to use for the server's files.  If not
     #   guessable from the environment, it must be specified.  It must
     #   already exist.
+    # @option opts [String] :java_bin ("java" or
+    #   File.join(ENV["JAVA_HOME"], "bin", "java")) the java
+    #   executable to use to run the embedded server.
     def initialize(opts={})
       @port = opts[:port] || 3897
       @domain = opts[:domain] || "dc=example,dc=org"
@@ -62,6 +70,8 @@ module Ladle
       @verbose = opts[:verbose]
       @timeout = opts[:timeout] || 15
       @tmpdir = opts[:tmpdir] || ENV['TMPDIR'] || ENV['TEMPDIR']
+      @java_bin = opts[:java_bin] ||
+        (ENV['JAVA_HOME'] ? File.join(ENV['JAVA_HOME'], "bin", "java") : "java")
 
       # Additional arguments that can be passed to the java server
       # process.  Used for testing only, so not documented.
@@ -200,7 +210,7 @@ module Ladle
 
     def server_cmd
       [
-        "java",
+        java_bin,
         "-cp", classpath,
         "net.detailedbalance.ladle.Main",
         "--port", port,

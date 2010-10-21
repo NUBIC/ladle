@@ -24,6 +24,15 @@ describe Ladle, "::Server" do
   end
 
   describe "initialization of" do
+    def preserve_and_wipe_env(*env_vars)
+      @old_env = env_vars.inject({}) { |e, k| e[k] = ENV[k]; e }
+      @old_env.keys.each { |k| ENV[k] = nil }
+    end
+
+    def restore_env
+      @old_env.each { |k, v| ENV[k] = v }
+    end
+
     describe ":port" do
       it "defaults to 3897" do
         Ladle::Server.new.port.should == 3897
@@ -99,12 +108,11 @@ describe Ladle, "::Server" do
 
     describe ":tmpdir" do
       before do
-        @old_env = %w(TMPDIR TEMPDIR).inject({}) { |e, k| e[k] = ENV[k]; e }
-        @old_env.keys.each { |k| ENV[k] = nil }
+        preserve_and_wipe_env("TMPDIR", "TEMPDIR")
       end
 
       after do
-        @old_env.each { |k, v| ENV[k] = v }
+        restore_env
       end
 
       it "defaults to TMPDIR if set" do
@@ -132,6 +140,30 @@ describe Ladle, "::Server" do
       it "must be specified somehow" do
         lambda { Ladle::Server.new }.
           should raise_error(/Cannot guess tmpdir from the environment.  Please specify it./)
+      end
+    end
+
+    describe ":java" do
+      before do
+        preserve_and_wipe_env("JAVA_HOME")
+      end
+
+      after do
+        restore_env
+      end
+
+      it "relies on the path with no JAVA_HOME" do
+        Ladle::Server.new.java_bin.should == "java"
+      end
+
+      it "defaults to JAVA_HOME/bin/java if available" do
+        ENV["JAVA_HOME"] = tmpdir('myjdk')
+        Ladle::Server.new.java_bin.should == "#{tmpdir}/myjdk/bin/java"
+      end
+
+      it "can be overridden" do
+        Ladle::Server.new(:java_bin => File.join(tmpdir('openjdk'), "jre")).java_bin.
+          should == "#{tmpdir}/openjdk/jre"
       end
     end
   end
