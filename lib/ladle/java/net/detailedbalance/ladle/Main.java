@@ -37,7 +37,7 @@ public class Main {
             }
 
             final Server s = new Server(
-                new Integer(commandLine.getOptionValue("port")),
+                new Integer(commandLine.getOptionValue("p")),
                 "dc=example,dc=org",
                 new File("lib/ladle/default.ldif"),
                 new File("/tmp"));

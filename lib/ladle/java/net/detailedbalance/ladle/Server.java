@@ -1,27 +1,25 @@
 package net.detailedbalance.ladle;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.directory.server.core.DefaultDirectoryService;
-import org.apache.directory.server.core.DirectoryService;
-import org.apache.directory.server.core.authn.AuthenticationInterceptor;
-import org.apache.directory.server.core.entry.ServerEntry;
-import org.apache.directory.server.core.exception.ExceptionInterceptor;
-import org.apache.directory.server.core.interceptor.Interceptor;
-import org.apache.directory.server.core.normalization.NormalizationInterceptor;
-import org.apache.directory.server.core.operational.OperationalAttributeInterceptor;
-import org.apache.directory.server.core.partition.impl.btree.jdbm.JdbmPartition;
-import org.apache.directory.server.core.referral.ReferralInterceptor;
-import org.apache.directory.server.core.subtree.SubentryInterceptor;
-import org.apache.directory.server.ldap.LdapServer;
-import org.apache.directory.server.protocol.shared.store.LdifFileLoader;
-import org.apache.directory.server.protocol.shared.transport.TcpTransport;
-import org.apache.directory.shared.ldap.exception.LdapNameNotFoundException;
-import org.apache.directory.shared.ldap.name.LdapDN;
+import org.apache.directory.server.configuration.MutableServerStartupConfiguration;
+import org.apache.directory.server.core.configuration.Configuration;
+import org.apache.directory.server.core.configuration.MutablePartitionConfiguration;
+import org.apache.directory.server.core.configuration.ShutdownConfiguration;
 import org.apache.log4j.Logger;
 
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.BasicAttributes;
+import javax.naming.directory.InitialDirContext;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -29,8 +27,8 @@ import java.util.UUID;
  * for thread-safety or even to be used in the same JVM as anything else -- it's intended to be run
  * in its own process to provide LDAP access over TCP.
  * <p>
- * The idea of using ApacheDS for this, as well as some of the details, are from Spring Security's
- * LDAP test support.
+ * The idea of using ApacheDS for this was from Spring Security's LDAP test support.  The details
+ * are from the ApacheDS embedding and unit testing documentation.
  */
 public class Server {
     private final Logger log = Logger.getLogger(getClass());
@@ -38,18 +36,14 @@ public class Server {
     private final int port;
     private final String domainComponent;
     private final File tempDir;
-    private final DefaultDirectoryService service;
-    private final LdapServer server;
+    private final File ldifDir;
     private boolean running = false;
 
     public Server(int port, String domainComponent, File ldifFile, File tempDirBase) {
         this.port = port;
         this.domainComponent = domainComponent;
         this.tempDir = createTempDir(tempDirBase);
-
-        this.service = createAndStartDirectoryService();
-        this.server = createServer();
-        importLdif(ldifFile);
+        this.ldifDir = prepareLdif(ldifFile);
     }
 
     ////// SETUP
@@ -64,80 +58,33 @@ public class Server {
         }
     }
 
-    private DefaultDirectoryService createAndStartDirectoryService() {
-        log.info("Creating ApacheDS directory service");
-        DefaultDirectoryService svc = new DefaultDirectoryService();
+    private static Hashtable<String, String> baseEnvironment() {
+        Hashtable<String, String> env = new Hashtable<String, String>();
+        env.put(Context.PROVIDER_URL, "");
+        env.put(Context.INITIAL_CONTEXT_FACTORY,
+            "org.apache.directory.server.jndi.ServerContextFactory");
 
-        // There is no high-level documentation of what interceptors are needed for what server
-        // types (etc), so this list is cargo-culted from Spring Security's ApacheDSContainer.
-        // Seems to work.
-        svc.setInterceptors(Arrays.<Interceptor>asList(
-            new NormalizationInterceptor(),
-            new AuthenticationInterceptor(),
-            new ReferralInterceptor(),
-            new ExceptionInterceptor(),
-            new OperationalAttributeInterceptor(),
-            new SubentryInterceptor()
-        ));
+        // these values are apparently hardcoded in ApacheDS
+        env.put(Context.SECURITY_PRINCIPAL, "uid=admin,ou=system");
+        env.put(Context.SECURITY_CREDENTIALS, "secret");
+        env.put(Context.SECURITY_AUTHENTICATION, "simple");
 
-        JdbmPartition root;
-        try {
-            root = new JdbmPartition();
-            root.setId("rootPartition");
-            root.setSuffix(domainComponent);
-            svc.addPartition(root);
-        } catch (Exception e) {
-            throw new LadleFatalException("Failed to create partition", e);
-        }
-
-        svc.setShutdownHookEnabled(false);
-        svc.setExitVmOnShutdown(false);
-        svc.getChangeLog().setEnabled(false);
-        svc.setWorkingDirectory(tempDir);
-
-        try {
-            log.info("Starting ApacheDS directory service");
-            svc.startup();
-        } catch (Exception e) {
-            throw new LadleFatalException("Failed to start directory service", e);
-        }
-
-        try {
-            svc.getAdminSession().lookup(root.getSuffixDn());
-        } catch (LdapNameNotFoundException e) {
-            createAndAddDomainComponentEntry(svc);
-        } catch (Exception e) {
-            throw new LadleFatalException("Failed to look up existing root DN", e);
-        }
-
-        return svc;
+        return env;
     }
 
-    private void createAndAddDomainComponentEntry(DirectoryService svc) {
-        String dc = domainComponent.split(",")[0].substring(3);
-        try {
-            LdapDN dn = new LdapDN(domainComponent);
-            ServerEntry entry = svc.newEntry(dn);
-            entry.add("objectClass", "top", "domain");
-            entry.add("dc", dc);
-            svc.getAdminSession().add(entry);
-        } catch (Exception e) {
-            throw new LadleFatalException("Failed to create DC entry for " + domainComponent, e);
+    private File prepareLdif(File ldifFile) {
+        File dir = new File(tempDir, "ldif");
+        if (!dir.mkdir()) {
+            throw new LadleFatalException("Could not create LDIF directory " + dir);
         }
-    }
 
-    private LdapServer createServer() {
-        LdapServer svr = new LdapServer();
-        svr.setDirectoryService(service);
-        svr.setTransports(new TcpTransport(port));
-        return svr;
-    }
+        try {
+            FileUtils.copyFileToDirectory(ldifFile, dir);
+        } catch (IOException e) {
+            throw new LadleFatalException("Copying " + ldifFile + " to " + dir + " failed.", e);
+        }
 
-    private void importLdif(File ldifFile) {
-        log.info("Importing from LDIF " + ldifFile);
-        LdifFileLoader loader = new LdifFileLoader(
-            service.getAdminSession(), ldifFile.getAbsolutePath());
-        loader.execute();
+        return dir;
     }
 
     ////// RUNNING
@@ -146,21 +93,69 @@ public class Server {
         if (running) return;
 
         try {
-            server.start();
-        } catch (Exception e) {
-            throw new LadleFatalException("LDAP server start failed", e);
+            MutableServerStartupConfiguration cfg = new MutableServerStartupConfiguration();
+            cfg.setWorkingDirectory(tempDir);
+            cfg.setLdifDirectory(ldifDir);
+            cfg.setEnableNetworking(true);
+            cfg.setLdapPort(port);
+            cfg.setAllowAnonymousAccess(true);
+            cfg.setAccessControlEnabled(false);
+            cfg.setShutdownHookEnabled(false);
+            cfg.setContextPartitionConfigurations(
+                Collections.singleton(createPartitionConfiguration()));
+
+            new InitialDirContext(createJndiEnvironment(cfg));
+        } catch (NamingException e) {
+            throw new LadleFatalException("Startup failed", e);
         }
 
         running = true;
     }
 
+    // Derived from http://directory.apache.org/apacheds/1.0/using-apacheds-for-unit-tests.html
+    private MutablePartitionConfiguration createPartitionConfiguration() throws NamingException {
+        MutablePartitionConfiguration pCfg = new MutablePartitionConfiguration();
+        pCfg.setName("ladle");
+        pCfg.setSuffix(domainComponent);
+
+        Set<String> indexedAttrs = new HashSet<String>();
+        indexedAttrs.add("objectClass");
+        indexedAttrs.add("dc");
+        indexedAttrs.add("uid");
+        pCfg.setIndexedAttributes( indexedAttrs );
+
+        // Create the root entry
+        {
+            Attributes attrs = new BasicAttributes(true);
+
+            Attribute attr = new BasicAttribute("objectClass");
+            attr.add("top");
+            attr.add("domain");
+            attrs.put(attr);
+
+            attr = new BasicAttribute("dc");
+            attr.add(domainComponent.split(",")[0].substring(3));
+            attrs.put(attr);
+
+            pCfg.setContextEntry(attrs);
+        }
+
+        return pCfg;
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    private Hashtable<String, String> createJndiEnvironment(Configuration cfg) {
+        Hashtable<String, String> env = baseEnvironment();
+        env.putAll(cfg.toJndiEnvironment());
+        return env;
+    }
+
     public void stop() {
         if (!running) return;
-        server.stop();
         try {
-            service.shutdown();
-        } catch (Exception e) {
-            log.error("Shutting down the directory service failed", e);
+            new InitialDirContext(createJndiEnvironment(new ShutdownConfiguration()));
+        } catch (NamingException e) {
+            throw new LadleFatalException("Shutdown failed", e);
         }
         running = false;
 
