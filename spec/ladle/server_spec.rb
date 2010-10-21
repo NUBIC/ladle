@@ -152,8 +152,17 @@ describe Ladle, "::Server" do
     def with_ldap
       @server.start
       Net::LDAP.open(ldap_parameters) do |ldap|
-        yield ldap
+        return yield ldap
       end
+    end
+
+    def ldap_search(filter, base=nil)
+      with_ldap { |ldap|
+        ldap.search(
+          :base => base || 'dc=example,dc=org',
+          :filter => filter
+        )
+      }
     end
 
     def ldap_parameters
@@ -165,17 +174,26 @@ describe Ladle, "::Server" do
 
     describe "the default set" do
       it "has 26 people" do
-        pending "ApacheDS 1.5.5 doesn't work with Net::LDAP#search"
-        with_ldap { |ldap|
-          ldap.search(
-            :base => 'dc=example,dc=org',
-            :filter => Net::LDAP::Filter.eq('uid', 'mm')
-          )
-        }.should have(26).results
+        ldap_search(Net::LDAP::Filter.pres('uid')).should have(26).people
       end
 
       it "has 1 group" do
-        pending "TODO"
+        ldap_search(Net::LDAP::Filter.pres('ou')).should have(1).group
+      end
+
+      it "has given names" do
+        ldap_search(Net::LDAP::Filter.pres('uid')).
+          select { |res| !res[:givenname] || res[:givenname].empty? }.should == []
+      end
+
+      it "has e-mail addresses" do
+        ldap_search(Net::LDAP::Filter.pres('uid')).
+          select { |res| !res[:mail] || res[:mail].empty? }.should == []
+      end
+
+      it "can be searched by value" do
+        ldap_search(Net::LDAP::Filter.eq(:givenname, 'Josephine')).
+          collect { |res| res[:uid].first }.should == %w(jj243)
       end
     end
   end
