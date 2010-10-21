@@ -6,8 +6,8 @@ Ladle dishes out steaming helpings of lightweight directory access
 framework.
 
 It spins up an actual LDAP server instance, so you can use it to test
-any sort of client application -- anything that communicates over the
-standard LDAP protocol.
+any sort of client application &mdash; anything that communicates over
+the standard LDAP protocol.
 
 Ladle itself is tested on both JRuby 1.5.2 and Ruby 1.8.7 and 1.9.1.
 It is a wrapper around [ApacheDS][] (a pure-java embeddable LDAP
@@ -68,6 +68,9 @@ block, then stop it in an `after` block:
     end
 
 For a shared server, use `before(:all)` and `after(:all)` instead.
+See [rspec's docs][rspec-before] for more info.
+
+[rspec-before]: http://rspec.info/documentation/before_and_after.html
 
 ### Cucumber
 

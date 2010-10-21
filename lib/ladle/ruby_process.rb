@@ -13,7 +13,9 @@ module Ladle
     end
 
     ##
-    # @return [[stdin, stderr, stdout]]
+    # Start the process and return pipes to its standard streams.
+    #
+    # @return [[IO, IO, IO]] stdin, stdout, and stderr for the running process.
     def popen
       @pid, i, o, e = Open4.open4(@command_and_args.join(' '))
       [i, o, e]

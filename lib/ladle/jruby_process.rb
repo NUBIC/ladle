@@ -16,7 +16,9 @@ module Ladle
     end
 
     ##
-    # @return [[stdin, stderr, stdout]]
+    # Start the process and return pipes to its standard streams.
+    #
+    # @return [[IO, IO, IO]] stdin, stdout, and stderr for the running process.
     def popen
       # You can't wait for the PID returned by JRuby's IO.popen4, so
       # this is necessary.
