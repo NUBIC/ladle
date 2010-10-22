@@ -5,6 +5,7 @@ work
 tmp
 Gemfile.lock
 *.class
+reports
 
 # YARD
 .yardoc

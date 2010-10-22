@@ -5,6 +5,7 @@ require 'rspec/core/rake_task'
 require 'yard'
 require 'yard/rake/yardoc_task'
 load File.expand_path("../tasks/remove_task.rake", __FILE__)
+require 'ci/reporter/rake/rspec'
 
 RSpec::Core::RakeTask.new do |t|
   t.pattern = "spec/**/*_spec.rb"
@@ -54,6 +55,13 @@ namespace :yard do
     rm_rf '.yardoc'
     rm_rf 'doc'
   end
+end
+
+namespace :ci do
+  ENV["CI_REPORTS"] = "reports/spec-xml"
+
+  desc "Run specs for CI"
+  task :spec => ['ci:setup:rspec', 'rake:spec']
 end
 
 def one_cmd(*cmd)
