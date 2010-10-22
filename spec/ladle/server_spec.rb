@@ -4,11 +4,24 @@ require 'net/ldap'
 
 describe Ladle, "::Server" do
   def create_server(opts = {})
-    Ladle::Server.new({ :quiet => true, :tmpdir => tmpdir }.merge(opts))
+    default_opts = { :tmpdir => tmpdir }.merge(
+      ENV['LADLE_TRACE'] ? { :verbose => true } : { :quiet => true })
+    Ladle::Server.new(default_opts.merge(opts))
+  end
+
+  def should_be_running
+    lambda { TCPSocket.new('localhost', @server.port) }.
+      should_not raise_error
+  end
+
+  def should_not_be_running
+    lambda { TCPSocket.new('localhost', @server.port) }.
+      should raise_error
   end
 
   before do
     @server = create_server
+    should_not_be_running # fail early
   end
 
   after do
@@ -169,11 +182,6 @@ describe Ladle, "::Server" do
   end
 
   describe "running" do
-    def should_be_running
-      lambda { TCPSocket.new('localhost', @server.port) }.
-        should_not raise_error
-    end
-
     it "blocks until the server is up" do
       @server.start
       should_be_running
