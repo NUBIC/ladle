@@ -7,7 +7,7 @@ java = (RUBY_PLATFORM == 'java')
 Gem::Specification.new do |s|
   s.name        = "ladle"
   s.version     = Ladle::VERSION
-  s.platform    = java ? Gem::Platform::JAVA : Gem::Platform::RUBY
+  s.platform    = java ? 'java' : 'ruby'
   s.authors     = ["Rhett Sutphin"]
   s.email       = ["rhett@detailedbalance.net"]
   s.homepage    = "http://github.com/rsutphin/ladle"
