@@ -4,6 +4,7 @@ Bundler::GemHelper.install_tasks
 require 'rspec/core/rake_task'
 require 'yard'
 require 'yard/rake/yardoc_task'
+load File.expand_path("../tasks/remove_task.rake", __FILE__)
 
 RSpec::Core::RakeTask.new do |t|
   t.pattern = "spec/**/*_spec.rb"
@@ -30,6 +31,7 @@ end
 # build task is provided by bundler's gem helper
 task :build => [:clean, :compile]
 
+remove_task(:release)
 desc "Release both the Ruby and JRuby variants of Ladle"
 task :release do
   system("rake -f meta.rakefile release")

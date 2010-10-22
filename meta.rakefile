@@ -1,5 +1,6 @@
 require 'rake'
 require 'bundler'
+load File.expand_path("../tasks/remove_task.rake", __FILE__)
 
 # This rakefile depends on the main one and uses RVM to implement
 # tasks that require multiple platforms at once.
@@ -35,3 +36,4 @@ module Ladle
 end
 
 Ladle::MultiplatformGemHelper.new(File.dirname(__FILE__)).install
+remove_task(:install)
