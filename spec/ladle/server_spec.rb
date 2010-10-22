@@ -16,7 +16,7 @@ describe Ladle, "::Server" do
 
   def should_not_be_running
     lambda { TCPSocket.new('localhost', @server.port) }.
-      should raise_error
+      should raise_error(/Connection refused/)
   end
 
   before do
