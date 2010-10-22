@@ -1,0 +1,37 @@
+require 'rake'
+require 'bundler'
+
+# This rakefile depends on the main one and uses RVM to implement
+# tasks that require multiple platforms at once.
+
+LADLE_PLATFORMS = {
+  :ruby18 => 'ree-1.8.7-2010.02',
+  :jruby  => 'jruby-1.5.2',
+  :ruby19 => 'ruby-1.9.1-p378'
+}
+
+def package_variants
+  [:ruby18, :jruby]
+end
+
+module Ladle
+  class MultiplatformGemHelper < Bundler::GemHelper
+    def build_gem
+      FileUtils.rm_rf 'pkg'
+      package_variants.each do |var|
+        sh("rvm #{LADLE_PLATFORMS[var]}@ladle rake build")
+      end
+      results = Dir["pkg/*.gem"]
+      Bundler.ui.confirm "#{name} #{version} built to #{results.inspect}"
+    end
+
+    def rubygems_push(paths)
+      paths.each do |path|
+        sh("gem push #{path}")
+        Bundler.ui.confirm "Pushed #{File.basename path} to rubygems.org"
+      end
+    end
+  end
+end
+
+Ladle::MultiplatformGemHelper.new(File.dirname(__FILE__)).install

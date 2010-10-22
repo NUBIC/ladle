@@ -30,6 +30,11 @@ end
 # build task is provided by bundler's gem helper
 task :build => [:clean, :compile]
 
+desc "Release both the Ruby and JRuby variants of Ladle"
+task :release do
+  system("rake -f meta.rakefile release")
+end
+
 desc "Run the yard server with automatic reloading enabled"
 task :yard => ['yard:auto']
 
