@@ -10,13 +10,17 @@ describe Ladle, "::Server" do
   end
 
   def should_be_running
-    lambda { TCPSocket.new('localhost', @server.port) }.
+    s = nil
+    lambda { s = TCPSocket.new('localhost', @server.port) }.
       should_not raise_error
+    s.close if s
   end
 
   def should_not_be_running
-    lambda { TCPSocket.new('localhost', @server.port) }.
+    s = nil
+    lambda { s = TCPSocket.new('localhost', @server.port) }.
       should raise_error(/Connection refused/)
+    s.close if s
   end
 
   before do
@@ -200,8 +204,7 @@ describe Ladle, "::Server" do
       @server.start
       @server.stop
       @server.start
-      lambda { TCPSocket.new('localhost', @server.port) }.
-        should_not raise_error
+      should_be_running
     end
 
     it "throws an exception when the server doesn't start up" do
@@ -246,9 +249,10 @@ describe Ladle, "::Server" do
 
     def with_ldap
       @server.start
-      Net::LDAP.open(ldap_parameters) do |ldap|
-        return yield ldap
-      end
+      # We don't use Net::LDAP.open because it seems to leak sockets,
+      # at least on Linux and with version 0.0.4 of the library.
+      ldap = Net::LDAP.new(ldap_parameters)
+      yield ldap
     end
 
     def ldap_search(filter, base=nil)
