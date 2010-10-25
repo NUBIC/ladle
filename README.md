@@ -14,7 +14,7 @@ It is a wrapper around [ApacheDS][] (a pure-java embeddable LDAP
 server), so it needs Java 1.5 or later available whether you are using
 JRuby or not.
 
-[ApacheDS]: http://directory.apache.org/apacheds/1.5/index.html
+[ApacheDS]: http://directory.apache.org/apacheds/1.0/index.html
 
 Ladle in 30 seconds
 -------------------
@@ -106,10 +106,19 @@ default data.  You can peruse it in `lib/ladle/default.ldif`.
 
 Note also that you will usually need to provide both the `:ldif` and
 `:domain` configuration parameters.  The latter must be the domain
-matching the data in the former.  (N.b. the implicit restriction of
-the data to a single domain.)
+component (dc) matching the data in the former.  (N.b. the implicit
+restriction of the data to a single domain.)
 
 [rfc2849]: http://tools.ietf.org/rfc/rfc2849.txt
+
+Project links
+-------------
+
+* [API documentation](http://rubydoc.info/github/rsutphin/ladle/master/frames)
+* [Continuous integration](https://ctms-ci.nubic.northwestern.edu/hudson/job/ladle/)
+* [Issue tracking](http://github.com/rsutphin/ladle/issues)
+
+Non-issue questions can be sent to rhett@detailedbalance.net.
 
 About
 -----
