@@ -183,6 +183,16 @@ describe Ladle, "::Server" do
           should == "#{tmpdir}/openjdk/jre"
       end
     end
+
+    describe ":allow_anonymous" do
+      it "defaults to true" do
+        Ladle::Server.new.allow_anonymous?.should be_true
+      end
+
+      it "can be overridden" do
+        Ladle::Server.new(:allow_anonymous => false).allow_anonymous?.should be_false
+      end
+    end
   end
 
   describe "running" do
@@ -263,7 +273,9 @@ describe Ladle, "::Server" do
         ldap.search(
           :base => base || 'dc=example,dc=org',
           :filter => filter
-        )
+        ).tap {
+          ldap.get_operation_result.code.should == 0 # success
+        }
       }
     end
 
@@ -298,7 +310,7 @@ describe Ladle, "::Server" do
           @server = create_server(
             :domain => "dc=example,dc=net",
             :ldif => File.expand_path("../animals.ldif", __FILE__)
-            )
+          )
         end
 
         it "has the groups provided by the other LDIF" do
@@ -325,6 +337,43 @@ describe Ladle, "::Server" do
         with_ldap do |ldap|
           ldap.authenticate("uid=hh153,ou=people,dc=example,dc=org", "mccoy".reverse)
           ldap.bind.should be_false
+        end
+      end
+
+      describe "with anonymous binding disabled" do
+        before do
+          @server = create_server(:allow_anonymous => false)
+        end
+
+        it "will not bind anonymously" do
+          with_ldap do |ldap|
+            # anonymous bind is successful even with anonymous access
+            # off, but searches fail appropriately
+            ldap.search(:filter => Net::LDAP::Filter.pres('uid'), :base => 'dc=example,dc=org')
+            ldap.get_operation_result.code.should == 50 # insufficient access
+          end
+        end
+
+        it "will bind with a username and valid password" do
+          with_ldap do |ldap|
+            ldap.authenticate("uid=kk891,ou=people,dc=example,dc=org", "enilk")
+            ldap.bind.should be_true
+          end
+        end
+
+        it "will not bind with a username and invalid password" do
+          with_ldap do |ldap|
+            ldap.authenticate("uid=kk891,ou=people,dc=example,dc=org", "kevin")
+            ldap.bind.should be_false
+          end
+        end
+
+        it "permits searches for authenticated users" do
+          with_ldap do |ldap|
+            ldap.authenticate("uid=kk891,ou=people,dc=example,dc=org", "enilk")
+            ldap.search(:filter => Net::LDAP::Filter.pres('uid'), :base => 'dc=example,dc=org').
+              should have(26).results
+          end
         end
       end
     end

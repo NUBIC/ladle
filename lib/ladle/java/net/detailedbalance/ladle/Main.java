@@ -40,7 +40,8 @@ public class Main {
                 new Integer(commandLine.getOptionValue("p")),
                 commandLine.getOptionValue("d"),
                 new File(commandLine.getOptionValue("l")),
-                new File(commandLine.getOptionValue("t")));
+                new File(commandLine.getOptionValue('t')),
+                !commandLine.hasOption('A'));
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 public void run() {
@@ -110,6 +111,10 @@ public class Main {
                 withLongOpt("tmpdir").hasArg().isRequired().
                 withDescription("Specify the temporary directory to use").
                 create('t'))
+            .addOption(OptionBuilder.
+                withLongOpt("no-anonymous").
+                withDescription("Disable anonymous access").
+                create('A'))
             ;
         CommandLineParser parser = new GnuParser();
 

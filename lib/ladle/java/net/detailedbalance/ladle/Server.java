@@ -35,13 +35,17 @@ public class Server {
 
     private final int port;
     private final String domainComponent;
+    private final boolean allowAnonymous;
     private final File tempDir;
     private final File ldifDir;
     private boolean running = false;
 
-    public Server(int port, String domainComponent, File ldifFile, File tempDirBase) {
+    public Server(
+        int port, String domainComponent, File ldifFile, File tempDirBase, boolean allowAnonymous
+    ) {
         this.port = port;
         this.domainComponent = domainComponent;
+        this.allowAnonymous = allowAnonymous;
         this.tempDir = createTempDir(tempDirBase);
         this.ldifDir = prepareLdif(ldifFile);
     }
@@ -98,7 +102,7 @@ public class Server {
             cfg.setLdifDirectory(ldifDir);
             cfg.setEnableNetworking(true);
             cfg.setLdapPort(port);
-            cfg.setAllowAnonymousAccess(true);
+            cfg.setAllowAnonymousAccess(allowAnonymous);
             cfg.setAccessControlEnabled(false);
             cfg.setShutdownHookEnabled(false);
             cfg.setContextPartitionConfigurations(

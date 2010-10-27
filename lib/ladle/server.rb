@@ -47,6 +47,8 @@ module Ladle
     #   :domain option to match.
     # @option opts [String] :domain ("dc=example,dc=org") the domain
     #   for the data provided in the :ldif option.
+    # @option opts [Boolean] :allow_anonymous (true) whether anonymous
+    #   users will be able to query the server.
     # @option opts [Boolean] :verbose (false) if true, detailed
     #   information about the execution of the server will be printed
     #   to standard error.
@@ -66,6 +68,7 @@ module Ladle
       @port = opts[:port] || 3897
       @domain = opts[:domain] || "dc=example,dc=org"
       @ldif = opts[:ldif] || File.expand_path("../default.ldif", __FILE__)
+      @allow_anonymous = opts[:allow_anonymous].nil? ? true : opts[:allow_anonymous]
       @quiet = opts[:quiet]
       @verbose = opts[:verbose]
       @timeout = opts[:timeout] || 15
@@ -193,6 +196,15 @@ module Ladle
       @verbose
     end
 
+    ##
+    # Whether anonymous users will be allowed access to the server
+    # once it is running.
+    #
+    # @return [Boolean]
+    def allow_anonymous?
+      @allow_anonymous
+    end
+
     private
 
     def create_process(*cmd)
@@ -216,8 +228,9 @@ module Ladle
         "--port", port,
         "--domain", domain,
         "--ldif", ldif,
-        "--tmpdir", tmpdir
-      ] + @additional_args
+        "--tmpdir", tmpdir,
+        ("--no-anonymous" unless allow_anonymous?)
+      ].compact + @additional_args
     end
 
     def classpath
