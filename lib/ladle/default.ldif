@@ -15,6 +15,8 @@ sn: Adams
 givenName: Alexandra
 mail: alexandra@example.org
 uid: aa729
+# Password is "smada"
+userpassword: {SHA}pGlmZX1VOEdHHb30HZezeVNFxGM=
 
 dn: uid=bb459,ou=people,dc=example,dc=org
 objectClass: top
@@ -26,6 +28,8 @@ sn: Baldwin
 givenName: Belle
 mail: belle@example.org
 uid: bb459
+# Password is "niwdlab"
+userpassword: {SHA}LRif2N+5TDSaO/rdkH2HHF8fF74=
 
 dn: uid=cc414,ou=people,dc=example,dc=org
 objectClass: top
@@ -37,6 +41,8 @@ sn: Carpenter
 givenName: Claire
 mail: claire@example.org
 uid: cc414
+# Password is "retneprac"
+userpassword: {SHA}UL/iS+2R7GhwbhXOWoTHd4/qoMA=
 
 dn: uid=dd945,ou=people,dc=example,dc=org
 objectClass: top
@@ -48,6 +54,8 @@ sn: Dawson
 givenName: Dorothy
 mail: dorothy@example.org
 uid: dd945
+# Password is "noswad"
+userpassword: {SHA}D0UlcTfbCddFLwih04ig4DEilAc=
 
 dn: uid=ee855,ou=people,dc=example,dc=org
 objectClass: top
@@ -59,6 +67,8 @@ sn: Emerson
 givenName: Elizabeth
 mail: elizabeth@example.org
 uid: ee855
+# Password is "nosreme"
+userpassword: {SHA}pheE9wd/iTps6f8bJjM6AePjwrU=
 
 dn: uid=ff531,ou=people,dc=example,dc=org
 objectClass: top
@@ -70,6 +80,8 @@ sn: Fuller
 givenName: Freya
 mail: freya@example.org
 uid: ff531
+# Password is "relluf"
+userpassword: {SHA}HLU2WZjFf/PF0Pp4qSDzoB3x+bs=
 
 dn: uid=gg855,ou=people,dc=example,dc=org
 objectClass: top
@@ -81,6 +93,8 @@ sn: Gonzales
 givenName: Grace
 mail: grace@example.org
 uid: gg855
+# Password is "selaznog"
+userpassword: {SHA}zT4oO9pFXIj+ISIc60bvM8A5+UQ=
 
 dn: uid=hh153,ou=people,dc=example,dc=org
 objectClass: top
@@ -92,6 +106,8 @@ sn: Hatfield
 givenName: Hilda
 mail: hilda@example.org
 uid: hh153
+# Password is "dleiftah"
+userpassword: {SHA}PTDJLPy4kwa7VZ/sGLyCPzZ7d3o=
 
 dn: uid=ii711,ou=people,dc=example,dc=org
 objectClass: top
@@ -103,6 +119,8 @@ sn: Ingram
 givenName: Iona
 mail: iona@example.org
 uid: ii711
+# Password is "margni"
+userpassword: {SHA}L7qElLblWuLNFPrFku60uCuCr7Q=
 
 dn: uid=jj243,ou=people,dc=example,dc=org
 objectClass: top
@@ -114,6 +132,8 @@ sn: Jackson
 givenName: Josephine
 mail: josephine@example.org
 uid: jj243
+# Password is "noskcaj"
+userpassword: {SHA}ElqdCxdbvRNqXBgdUdkCmGZlQmk=
 
 dn: uid=kk891,ou=people,dc=example,dc=org
 objectClass: top
@@ -125,6 +145,8 @@ sn: Kline
 givenName: Kelly
 mail: kelly@example.org
 uid: kk891
+# Password is "enilk"
+userpassword: {SHA}WlNzQqBB/QoEKh3LRcLZHgnCGNw=
 
 dn: uid=ll819,ou=people,dc=example,dc=org
 objectClass: top
@@ -136,6 +158,8 @@ sn: Lawrence
 givenName: Leah
 mail: leah@example.org
 uid: ll819
+# Password is "ecnerwal"
+userpassword: {SHA}CzyyPOSrIxgFCm24nSv2FA8wihQ=
 
 dn: uid=mm405,ou=people,dc=example,dc=org
 objectClass: top
@@ -147,6 +171,8 @@ sn: Maddox
 givenName: Mona
 mail: mona@example.org
 uid: mm405
+# Password is "xoddam"
+userpassword: {SHA}WiCnxkOb4kpy16ON7ZC6mD/iqII=
 
 dn: uid=nn297,ou=people,dc=example,dc=org
 objectClass: top
@@ -158,6 +184,8 @@ sn: Nash
 givenName: Noel
 mail: noel@example.org
 uid: nn297
+# Password is "hsan"
+userpassword: {SHA}1zOsG076wDkikQbnK5vAMM1BM/o=
 
 dn: uid=oo981,ou=people,dc=example,dc=org
 objectClass: top
@@ -169,6 +197,8 @@ sn: Osborn
 givenName: Ophelia
 mail: ophelia@example.org
 uid: oo981
+# Password is "nrobso"
+userpassword: {SHA}w8mQw0kEa1UiWzMsNclD/LWzlgs=
 
 dn: uid=pp468,ou=people,dc=example,dc=org
 objectClass: top
@@ -180,6 +210,8 @@ sn: Patel
 givenName: Penelope
 mail: penelope@example.org
 uid: pp468
+# Password is "letap"
+userpassword: {SHA}p7jaVoRIV9o8gDPbN10sEhXaYHk=
 
 dn: uid=qq612,ou=people,dc=example,dc=org
 objectClass: top
@@ -191,6 +223,8 @@ sn: Queen
 givenName: Quin
 mail: quin@example.org
 uid: qq612
+# Password is "neeuq"
+userpassword: {SHA}v9ibNIx42giCH4tQnwUHJy6LeJg=
 
 dn: uid=rr477,ou=people,dc=example,dc=org
 objectClass: top
@@ -202,6 +236,8 @@ sn: Rowland
 givenName: Ruth
 mail: ruth@example.org
 uid: rr477
+# Password is "dnalwor"
+userpassword: {SHA}S3eMb2C/ctXzbFnlgcH7ZQ/fozU=
 
 dn: uid=ss198,ou=people,dc=example,dc=org
 objectClass: top
@@ -213,6 +249,8 @@ sn: Solomon
 givenName: Serena
 mail: serena@example.org
 uid: ss198
+# Password is "nomolos"
+userpassword: {SHA}EizIKlU79Kz1Y2WIV4deIh0MSA8=
 
 dn: uid=tt882,ou=people,dc=example,dc=org
 objectClass: top
@@ -224,6 +262,8 @@ sn: Torres
 givenName: Talia
 mail: talia@example.org
 uid: tt882
+# Password is "serrot"
+userpassword: {SHA}yO0DcSZ4fTMcx3sTHnAPQGvMkwg=
 
 dn: uid=uu972,ou=people,dc=example,dc=org
 objectClass: top
@@ -235,6 +275,8 @@ sn: Underwood
 givenName: Ursula
 mail: ursula@example.org
 uid: uu972
+# Password is "doowrednu"
+userpassword: {SHA}GQWGu8IvIEFU1PP34qGi5DyDF/c=
 
 dn: uid=vv180,ou=people,dc=example,dc=org
 objectClass: top
@@ -246,6 +288,8 @@ sn: Vickers
 givenName: Vera
 mail: vera@example.org
 uid: vv180
+# Password is "srekciv"
+userpassword: {SHA}3UrzY38O4R1GLK6ccSSfL4D0efQ=
 
 dn: uid=ww369,ou=people,dc=example,dc=org
 objectClass: top
@@ -257,6 +301,8 @@ sn: Wise
 givenName: Wendy
 mail: wendy@example.org
 uid: ww369
+# Password is "esiw"
+userpassword: {SHA}8gU4KSqUeeLRPov2tmXZXgOZw78=
 
 dn: uid=xx396,ou=people,dc=example,dc=org
 objectClass: top
@@ -268,6 +314,8 @@ sn: Xiong
 givenName: Xara
 mail: xara@example.org
 uid: xx396
+# Password is "gnoix"
+userpassword: {SHA}Yc2En2R/sbdjlEOitkLlkwY4jAY=
 
 dn: uid=yy423,ou=people,dc=example,dc=org
 objectClass: top
@@ -279,6 +327,8 @@ sn: Yates
 givenName: Yvette
 mail: yvette@example.org
 uid: yy423
+# Password is "setay"
+userpassword: {SHA}iKBhwF+Mbbct6mlmy6AvodIek3E=
 
 dn: uid=zz882,ou=people,dc=example,dc=org
 objectClass: top
@@ -290,3 +340,6 @@ sn: Zimmerman
 givenName: Zana
 mail: zana@example.org
 uid: zz882
+# Password is "namremmiz"
+userpassword: {SHA}KlsWojnknRWCHXGoBOTlEZxxrG8=
+

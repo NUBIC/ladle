@@ -242,16 +242,19 @@ describe Ladle, "::Server" do
     end
   end
 
-  describe "data" do
+  describe "LDAP implementation" do
     before do
       pending "Net::LDAP doesn't work on 1.9" if RUBY_VERSION =~ /1.9/
     end
 
-    def with_ldap
+    def with_ldap(params={})
       @server.start
       # We don't use Net::LDAP.open because it seems to leak sockets,
       # at least on Linux and with version 0.0.4 of the library.
-      ldap = Net::LDAP.new(ldap_parameters)
+      ldap = Net::LDAP.new({
+          :host => 'localhost', :port => @server.port,
+          :auth => { :method => :anonymous }
+        }.merge(params))
       yield ldap
     end
 
@@ -264,54 +267,65 @@ describe Ladle, "::Server" do
       }
     end
 
-    def ldap_parameters
-      @ldap_parameters ||= {
-        :host => 'localhost', :port => @server.port,
-        :auth => { :method => :anonymous }
-      }
+    describe "data" do
+      describe "the default set" do
+        it "has 26 people" do
+          ldap_search(Net::LDAP::Filter.pres('uid')).should have(26).people
+        end
+
+        it "has 1 group" do
+          ldap_search(Net::LDAP::Filter.pres('ou')).should have(1).group
+        end
+
+        it "has given names" do
+          ldap_search(Net::LDAP::Filter.pres('uid')).
+            select { |res| !res[:givenname] || res[:givenname].empty? }.should == []
+        end
+
+        it "has e-mail addresses" do
+          ldap_search(Net::LDAP::Filter.pres('uid')).
+            select { |res| !res[:mail] || res[:mail].empty? }.should == []
+        end
+
+        it "can be searched by value" do
+          ldap_search(Net::LDAP::Filter.eq(:givenname, 'Josephine')).
+            collect { |res| res[:uid].first }.should == %w(jj243)
+        end
+      end
+
+      describe "with a provided set" do
+        before do
+          @server = create_server(
+            :domain => "dc=example,dc=net",
+            :ldif => File.expand_path("../animals.ldif", __FILE__)
+            )
+        end
+
+        it "has the groups provided by the other LDIF" do
+          ldap_search(Net::LDAP::Filter.pres('ou'), 'dc=example,dc=net').
+            collect { |result| result[:ou].first }.should == ["animals"]
+        end
+
+        it "has the individuals provided by the other LDIF" do
+          ldap_search(Net::LDAP::Filter.pres('uid'), 'dc=example,dc=net').
+            collect { |result| result[:givenname].first }.sort.should == %w(Ada Bob)
+        end
+      end
     end
 
-    describe "the default set" do
-      it "has 26 people" do
-        ldap_search(Net::LDAP::Filter.pres('uid')).should have(26).people
+    describe "binding" do
+      it "works with a valid password" do
+        with_ldap do |ldap|
+          ldap.authenticate("uid=hh153,ou=people,dc=example,dc=org", "hatfield".reverse)
+          ldap.bind.should be_true
+        end
       end
 
-      it "has 1 group" do
-        ldap_search(Net::LDAP::Filter.pres('ou')).should have(1).group
-      end
-
-      it "has given names" do
-        ldap_search(Net::LDAP::Filter.pres('uid')).
-          select { |res| !res[:givenname] || res[:givenname].empty? }.should == []
-      end
-
-      it "has e-mail addresses" do
-        ldap_search(Net::LDAP::Filter.pres('uid')).
-          select { |res| !res[:mail] || res[:mail].empty? }.should == []
-      end
-
-      it "can be searched by value" do
-        ldap_search(Net::LDAP::Filter.eq(:givenname, 'Josephine')).
-          collect { |res| res[:uid].first }.should == %w(jj243)
-      end
-    end
-
-    describe "with a provided set" do
-      before do
-        @server = create_server(
-          :domain => "dc=example,dc=net",
-          :ldif => File.expand_path("../animals.ldif", __FILE__)
-        )
-      end
-
-      it "has the groups provided by the other LDIF" do
-        ldap_search(Net::LDAP::Filter.pres('ou'), 'dc=example,dc=net').
-          collect { |result| result[:ou].first }.should == ["animals"]
-      end
-
-      it "has the individuals provided by the other LDIF" do
-        ldap_search(Net::LDAP::Filter.pres('uid'), 'dc=example,dc=net').
-          collect { |result| result[:givenname].first }.sort.should == %w(Ada Bob)
+      it "does not work with an invalid password" do
+        with_ldap do |ldap|
+          ldap.authenticate("uid=hh153,ou=people,dc=example,dc=org", "mccoy".reverse)
+          ldap.bind.should be_false
+        end
       end
     end
   end
