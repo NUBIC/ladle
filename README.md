@@ -111,6 +111,13 @@ restriction of the data to a single domain.)
 
 [rfc2849]: http://tools.ietf.org/rfc/rfc2849.txt
 
+Additional classes
+------------------
+
+If you need to use LDAP classes that are not among the standard set
+provided by ApacheDS, you'll need to specify a custom schema.  See
+{file:CUSTOM-SCHEMA.md} for details.
+
 Project links
 -------------
 

@@ -2,4 +2,4 @@
 --no-private
 --hide-void-return
 --readme README.md
---files CHANGELOG.md
+--files CHANGELOG.md,CUSTOM-SCHEMA.md
