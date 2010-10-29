@@ -36,7 +36,7 @@ begin
 
       def rubygems_push(paths)
         paths.each do |path|
-          sh("gem push #{path}")
+          Bundler.ui.confirm sh("gem push #{path}")
           Bundler.ui.confirm "Pushed #{File.basename path} to rubygems.org"
         end
       end
