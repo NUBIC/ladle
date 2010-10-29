@@ -193,6 +193,38 @@ describe Ladle, "::Server" do
         Ladle::Server.new(:allow_anonymous => false).allow_anonymous?.should be_false
       end
     end
+
+    describe ":custom_schemas" do
+      it "defaults to an empty list" do
+        Ladle::Server.new.custom_schemas.should == []
+      end
+
+      it "can be set from one class name" do
+        Ladle::Server.new(:custom_schemas => "net.example.HappySchema").
+          custom_schemas.should == %w(net.example.HappySchema)
+      end
+
+      it "can be set from a list" do
+        Ladle::Server.new(:custom_schemas => ["net.example.HappySchema", "net.example.SadSchema"]).
+          custom_schemas.should == %w(net.example.HappySchema net.example.SadSchema)
+      end
+    end
+
+    describe ":additional_classpath" do
+      it "defaults to an empty list" do
+        Ladle::Server.new.additional_classpath.should == []
+      end
+
+      it "can be set from one entry" do
+        Ladle::Server.new(:additional_classpath => "foo").
+          additional_classpath.should == %w(foo)
+      end
+
+      it "can be set from a list" do
+        Ladle::Server.new(:additional_classpath => ["bar", "baz"]).
+          additional_classpath.should == %w(bar baz)
+      end
+    end
   end
 
   describe "running" do
@@ -321,6 +353,22 @@ describe Ladle, "::Server" do
         it "has the individuals provided by the other LDIF" do
           ldap_search(Net::LDAP::Filter.pres('uid'), 'dc=example,dc=net').
             collect { |result| result[:givenname].first }.sort.should == %w(Ada Bob)
+        end
+      end
+
+      describe "with a custom schema" do
+        before do
+          @server = create_server(
+            :ldif => File.expand_path("../animals-custom.ldif", __FILE__),
+            :domain => "dc=example,dc=net",
+            :custom_schemas => %w(net.detailedbalance.ladle.test.AnimalSchema),
+            :additional_classpath => File.expand_path("../animal-schema.jar", __FILE__)
+          )
+        end
+
+        it "has the data defined in the schema" do
+          ldap_search(Net::LDAP::Filter.pres('species'), 'dc=example,dc=net').
+            collect { |r| r[:species].first }.sort.should == ["Meles meles", "Orycteropus afer"]
         end
       end
     end

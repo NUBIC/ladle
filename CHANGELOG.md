@@ -1,5 +1,7 @@
-0.1.2
+0.2.0
 =====
+
+- Support custom schemas.
 
 0.1.1
 =====

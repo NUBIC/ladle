@@ -5,6 +5,7 @@ import org.apache.directory.server.configuration.MutableServerStartupConfigurati
 import org.apache.directory.server.core.configuration.Configuration;
 import org.apache.directory.server.core.configuration.MutablePartitionConfiguration;
 import org.apache.directory.server.core.configuration.ShutdownConfiguration;
+import org.apache.directory.server.core.schema.bootstrap.BootstrapSchema;
 import org.apache.log4j.Logger;
 
 import javax.naming.Context;
@@ -16,6 +17,7 @@ import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.InitialDirContext;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -39,6 +41,7 @@ public class Server {
     private final File tempDir;
     private final File ldifDir;
     private boolean running = false;
+    private Collection<Class<?>> customSchemas = Collections.emptyList();
 
     public Server(
         int port, String domainComponent, File ldifFile, File tempDirBase, boolean allowAnonymous
@@ -93,6 +96,7 @@ public class Server {
 
     ////// RUNNING
 
+    @SuppressWarnings({"unchecked"})
     public void start() {
         if (running) return;
 
@@ -107,10 +111,21 @@ public class Server {
             cfg.setShutdownHookEnabled(false);
             cfg.setContextPartitionConfigurations(
                 Collections.singleton(createPartitionConfiguration()));
+            if (!customSchemas.isEmpty()) {
+                Set<BootstrapSchema> schemas = cfg.getBootstrapSchemas();
+                for (Class<?> customSchemaClass : customSchemas) {
+                    schemas.add((BootstrapSchema) customSchemaClass.newInstance());
+                }
+                cfg.setBootstrapSchemas(schemas);
+            }
 
             new InitialDirContext(createJndiEnvironment(cfg));
         } catch (NamingException e) {
             throw new LadleFatalException("Startup failed", e);
+        } catch (InstantiationException e) {
+            throw new LadleFatalException("Custom schema not initializable", e);
+        } catch (IllegalAccessException e) {
+            throw new LadleFatalException("Custom schema not initializable", e);
         }
 
         running = true;
@@ -170,5 +185,9 @@ public class Server {
                 log.error("Deleting the temporary directory " + tempDir + " failed", e);
             }
         }
+    }
+
+    public void setCustomSchemas(Collection<Class<?>> customSchemas) {
+        this.customSchemas = customSchemas;
     }
 }

@@ -39,6 +39,17 @@ module Ladle
     attr_reader :java_bin
 
     ##
+    # Any custom schemas to use with the server.
+    # @return [Array<String>]
+    attr_reader :custom_schemas
+
+    ##
+    # Any additional entries to add to the classpath for the server,
+    # e.g., jars containing custom schemas.
+    # @return [Array<String>]
+    attr_reader :additional_classpath
+
+    ##
     # @param [Hash] opts the options for the server
     # @option opts [Fixnum] :port (3897) The port to serve from.
     # @option opts [String] :ldif ({path to the gem}/lib/ladle/default.ldif)
@@ -75,6 +86,9 @@ module Ladle
       @tmpdir = opts[:tmpdir] || ENV['TMPDIR'] || ENV['TEMPDIR']
       @java_bin = opts[:java_bin] ||
         (ENV['JAVA_HOME'] ? File.join(ENV['JAVA_HOME'], "bin", "java") : "java")
+      @custom_schemas = opts[:custom_schemas] ? [*opts[:custom_schemas]] : []
+      @additional_classpath =
+        opts[:additional_classpath] ? [*opts[:additional_classpath]] : []
 
       # Additional arguments that can be passed to the java server
       # process.  Used for testing only, so not documented.
@@ -229,8 +243,12 @@ module Ladle
         "--domain", domain,
         "--ldif", ldif,
         "--tmpdir", tmpdir,
-        ("--no-anonymous" unless allow_anonymous?)
-      ].compact + @additional_args
+        ("--no-anonymous" unless allow_anonymous?),
+        ([
+            "--custom-schemas",
+            custom_schemas.join(',')
+          ] unless custom_schemas.empty?)
+      ].flatten.compact + @additional_args
     end
 
     def classpath
@@ -238,7 +256,9 @@ module Ladle
         # ApacheDS
         Dir[File.expand_path("../apacheds/*.jar", __FILE__)] +
         # Wrapper code
-        [File.expand_path("../java", __FILE__)]
+        [File.expand_path("../java", __FILE__)] +
+        # User-specified classpath
+        additional_classpath
       ).join(':')
     end
 

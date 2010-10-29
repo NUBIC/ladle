@@ -16,6 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The executable front-end to {@link Server}.  Uses stdin/stdout as a control channel, with
@@ -42,6 +45,14 @@ public class Main {
                 new File(commandLine.getOptionValue("l")),
                 new File(commandLine.getOptionValue('t')),
                 !commandLine.hasOption('A'));
+            if (commandLine.hasOption('S')) {
+                List<String> schemaClassNames = Arrays.asList(commandLine.getOptionValue('S').split(","));
+                List<Class<?>> schemaClasses = new ArrayList<Class<?>>(schemaClassNames.size());
+                for (String schemaClassName : schemaClassNames) {
+                    schemaClasses.add(Class.forName(schemaClassName));
+                }
+                s.setCustomSchemas(schemaClasses);
+            }
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 public void run() {
@@ -115,6 +126,10 @@ public class Main {
                 withLongOpt("no-anonymous").
                 withDescription("Disable anonymous access").
                 create('A'))
+            .addOption(OptionBuilder.
+                withLongOpt("custom-schemas").hasArg().
+                withDescription("Specify one or more custom schemas (comma-separated)").
+                create('S'))
             ;
         CommandLineParser parser = new GnuParser();
 

@@ -1,0 +1,22 @@
+version: 1
+
+dn: ou=animals,dc=example,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: animals
+
+dn: cn=Ada Aardvark,ou=animals,dc=example,dc=net
+objectClass: top
+objectClass: person
+objectClass: animal
+cn: Ada Aardvark
+sn: Aardvark
+species: Orycteropus afer
+
+dn: cn=Bob Badger,ou=animals,dc=example,dc=net
+objectClass: top
+objectClass: person
+objectClass: animal
+cn: Bob Badger
+sn: Badger
+species: Meles meles
