@@ -75,6 +75,11 @@ module Ladle
     # @option opts [String] :java_bin ("java" or
     #   File.join(ENV["JAVA_HOME"], "bin", "java")) the java
     #   executable to use to run the embedded server.
+    # @option opts [String,Array<String>] :custom_schemas ([]) the
+    #   names of classes representing custom schemas to use in the
+    #   server.
+    # @option opts [String,Array<String>] :additional_classpath
+    #   ([]) entries to add to the classpath for the embedded server.
     def initialize(opts={})
       @port = opts[:port] || 3897
       @domain = opts[:domain] || "dc=example,dc=org"
