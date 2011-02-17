@@ -57,11 +57,11 @@ namespace :ci do
   task :ensure_bundler_available do
     unless Gem.available?('bundler', BUNDLER_VERSION)
       puts "Installing bundler"
-      system "gem install bundler -v '#{BUNDLER_VERSION}'"
+      sh "gem install bundler -v '#{BUNDLER_VERSION}'"
     end
   end
 
   task :setup => [:ensure_bundler_available] do
-    system "bundle _#{BUNDLER_VERSION}_ install"
+    sh "bundle _#{BUNDLER_VERSION}_ update"
   end
 end
