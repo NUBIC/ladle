@@ -34,7 +34,7 @@ set +e
 gem list -i bundler -v $BUNDLER_VERSION
 if [ $? -ne 0 ]; then
   set -e
-  gem install bundler -v $BUNDLER_VERSION
+  gem install --no-rdoc --no-ri bundler -v $BUNDLER_VERSION
 fi
 set -e
 
