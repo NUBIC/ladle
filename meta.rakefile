@@ -4,20 +4,8 @@ load File.expand_path("../tasks/remove_task.rake", __FILE__)
 # This rakefile depends on the main one and uses RVM to implement
 # tasks that require multiple platforms at once.
 
-LADLE_PLATFORMS = {
-  :ruby18 => 'ree-1.8.7-2010.02',
-  :jruby  => 'jruby-1.5.2',
-  :ruby19 => 'ruby-1.9.1-p378'
-}
-
-BUNDLER_VERSION = '1.0.3'
-
 def package_variants
-  [:ruby18, :jruby]
-end
-
-def ci_env
-  (ENV["LADLE_ENV"] || :ruby18).to_sym
+  %w(1.8.7 jruby)
 end
 
 begin
@@ -28,7 +16,7 @@ begin
       def build_gem
         FileUtils.rm_rf 'pkg'
         package_variants.each do |var|
-          sh("rvm #{LADLE_PLATFORMS[var]}@ladle rake build")
+          sh("rvm #{var}@ladle rake build")
         end
         results = Dir["pkg/*.gem"]
         Bundler.ui.confirm "#{name} #{version} built to #{results.inspect}"
@@ -47,21 +35,4 @@ begin
   remove_task(:install)
 rescue LoadError
   $stderr.puts "Bundler's not installed; some tasks won't be available"
-end
-
-namespace :ci do
-  task :rvmrc do
-    puts "#{LADLE_PLATFORMS[ci_env]}@ladle"
-  end
-
-  task :ensure_bundler_available do
-    unless Gem.available?('bundler', BUNDLER_VERSION)
-      puts "Installing bundler"
-      sh "gem install bundler -v '#{BUNDLER_VERSION}'"
-    end
-  end
-
-  task :setup => [:ensure_bundler_available] do
-    sh "bundle _#{BUNDLER_VERSION}_ update"
-  end
 end

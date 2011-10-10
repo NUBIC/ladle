@@ -24,4 +24,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency java ? "maruku" : "rdiscount"
   s.add_development_dependency "ruby-net-ldap", "~> 0.0.4"
   s.add_development_dependency "ci_reporter", '~> 1.6'
+  s.add_development_dependency 'rake', '~> 0.9.2'
 end
