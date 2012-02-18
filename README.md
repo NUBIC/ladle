@@ -121,9 +121,9 @@ provided by ApacheDS, you'll need to specify a custom schema.  See
 Project links
 -------------
 
-* [API documentation](http://rubydoc.info/github/rsutphin/ladle/master/frames)
-* [Continuous integration](https://ctms-ci.nubic.northwestern.edu/hudson/job/ladle/)
-* [Issue tracking](http://github.com/rsutphin/ladle/issues)
+* [API documentation](http://rubydoc.info/github/NUBIC/ladle/master/frames)
+* [Continuous integration](https://public-ci.nubic.northwestern.edu/job/ladle/)
+* [Issue tracking](http://github.com/NUBIC/ladle/issues)
 
 Non-issue questions can be sent to rhett@detailedbalance.net.
 
