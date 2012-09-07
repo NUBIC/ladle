@@ -1,6 +1,8 @@
 0.2.1
 =====
 
+- Improve error handling on newer versions of JRuby.
+
 0.2.0
 =====
 

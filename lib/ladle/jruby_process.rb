@@ -49,7 +49,11 @@ module Ladle
     #
     # @return [void]
     def stop_gracefully
-      Process.kill 15, pid
+      begin
+        Process.kill 15, pid
+      rescue Errno::ESRCH
+        # already gone
+      end
     end
 
     ##
