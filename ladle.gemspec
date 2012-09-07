@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.test_files    = Dir["spec/**/*"]
   s.require_paths = ["lib"]
 
-  s.add_dependency "open4", "~> 1.0.0" unless java
+  s.add_dependency "open4", "~> 1.0" unless java
   s.add_development_dependency "rspec", "~> 2.0"
   s.add_development_dependency "yard", "~> 0.6.1"
   s.add_development_dependency java ? "maruku" : "rdiscount"
