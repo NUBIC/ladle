@@ -285,10 +285,6 @@ describe Ladle, "::Server" do
   end
 
   describe "LDAP implementation" do
-    before do
-      pending "Net::LDAP doesn't work on 1.9" if RUBY_VERSION =~ /1.9/
-    end
-
     def with_ldap(params={})
       @server.start
       # We don't use Net::LDAP.open because it seems to leak sockets,
