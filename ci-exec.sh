@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-BUNDLER_VERSION=1.1.rc
+BUNDLER_VERSION=1.2.0
 GEMSET=ladle
 
 if [ -z $CI_RUBY ]; then
