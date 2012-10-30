@@ -85,7 +85,10 @@ To use a server per test, use Cucumber's `Around` [hook][cucumber-hooks]:
 If you want just one server, consider something like this:
 
     Before('@ldap') do
-      @ladle ||= Ladle::Server.new(:quiet => true).start
+      if !$ldap_server_setup
+        @ladle ||= Ladle::Server.new(:quiet => true).start
+        $ldap_server_setup = true
+      end
     end
 
 This will start up a server for the first feature which needs it (and
@@ -95,7 +98,7 @@ end of the run.  (Cucumber's hooks documentation notes that you would,
 in general, need to register an `at_exit` block for the process to be
 torn down at the end.  {Ladle::Server#start} does this automatically.)
 
-[cucumber-hooks]: http://github.com/aslakhellesoy/cucumber/wiki/hooks
+[cucumber-hooks]: https://github.com/cucumber/cucumber/wiki/Hooks
 
 Test data
 ---------
