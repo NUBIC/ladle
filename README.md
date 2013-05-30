@@ -14,6 +14,10 @@ It is a wrapper around [ApacheDS][] (a pure-java embeddable LDAP
 server), so it needs Java 1.5 or later available whether you are using
 JRuby or not.
 
+Ladle will not work with MRI on Windows. (A pull request adding this support
+would be eagerly reviewed.) It should work with JRuby on Windows, though this
+hasn't been tested.
+
 [ApacheDS]: http://directory.apache.org/apacheds/1.0/index.html
 
 Ladle in 30 seconds
