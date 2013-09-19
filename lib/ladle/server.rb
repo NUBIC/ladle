@@ -283,7 +283,7 @@ module Ladle
       end
 
       def watch
-        while (line = @ds_out.readline) && !error?
+        while ( !@ds_out.eof? && line = @ds_out.readline ) && !error?
           case line
           when /^STARTED/
             @started = true
