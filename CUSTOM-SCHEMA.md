@@ -34,7 +34,7 @@ Add the line:
 
 Then continue with the directions.
 
-[ds-custom]: http://directory.apache.org/apacheds/1.0/custom-schema.html
+[ds-custom]: https://cwiki.apache.org/confluence/display/DIRxSRVx10/Custom+Schema
 [mvn]: http://maven.apache.org/
 
 Configure ladle to use the custom schema
