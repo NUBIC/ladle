@@ -394,7 +394,7 @@ describe Ladle, "::Server" do
             # anonymous bind is successful even with anonymous access
             # off, but searches fail appropriately
             ldap.search(:filter => Net::LDAP::Filter.pres('uid'), :base => 'dc=example,dc=org')
-            ldap.get_operation_result.code.should == 50 # insufficient access
+            ldap.get_operation_result.code.should == 49 # invalid credentials
           end
         end
 

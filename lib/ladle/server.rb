@@ -99,7 +99,7 @@ module Ladle
       # process.  Used for testing only, so not documented.
       @additional_args = opts[:more_args] || []
 
-      unless @domain =~ /^dc=/
+      unless @domain =~ /^dc=/i
         raise "The domain component must start with 'dc='.  '#{@domain}' does not."
       end
 
