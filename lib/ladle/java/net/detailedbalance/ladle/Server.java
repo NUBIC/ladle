@@ -27,17 +27,10 @@ import org.apache.directory.server.core.partition.ldif.LdifPartition;
 import org.apache.directory.server.i18n.I18n;
 import org.apache.directory.server.ldap.LdapServer;
 import org.apache.directory.server.protocol.shared.transport.TcpTransport;
-import org.apache.directory.server.protocol.shared.store.LdifFileLoader;
-import org.apache.directory.server.core.api.CoreSession;
 import org.apache.log4j.Logger;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.BasicAttribute;
-import javax.naming.directory.BasicAttributes;
-import javax.naming.directory.InitialDirContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,7 +61,7 @@ public class Server {
     private final String domainComponent;
     private final boolean allowAnonymous;
     private final File tempDir;
-    private final String ldifFile;
+    private final String ldifFileName;
     private final File ldifDir;
     private boolean running = false;
     private Collection<Class<?>> customSchemas = Collections.emptyList();
@@ -83,7 +76,7 @@ public class Server {
         this.domainComponent = domainComponent;
         this.allowAnonymous = allowAnonymous;
         this.tempDir = createTempDir(tempDirBase);
-        this.ldifFile = ldifFile.getPath();
+        this.ldifFileName = ldifFile.getPath();
         this.ldifDir = prepareLdif(ldifFile);
     }
 
@@ -122,7 +115,7 @@ public class Server {
         try {
             FileUtils.copyFileToDirectory(ldifFile, dir);
         } catch (IOException e) {
-            throw new LadleFatalException("Copying " + ldifFile + " to " + dir + " failed.", e);
+            throw new LadleFatalException("Copying " + ldifFileName + " to " + dir + " failed.", e);
         }
 
         return dir;
@@ -148,18 +141,7 @@ public class Server {
             initSchemaPartition();
             
             // then the system partition
-            // this is a MANDATORY partition
-            // DO NOT add this via addPartition() method, trunk code complains about duplicate partition
-            // while initializing 
-            JdbmPartition systemPartition = new JdbmPartition(service.getSchemaManager());
-            systemPartition.setId( "system" );
-            systemPartition.setPartitionPath( new File( service.getInstanceLayout().getPartitionsDirectory(), systemPartition.getId() ).toURI() );
-            systemPartition.setSuffixDn( new Dn( ServerDNConstants.SYSTEM_DN ) );
-            systemPartition.setSchemaManager( service.getSchemaManager() );
-
-            // mandatory to call this method to set the system partition
-            // Note: this system partition might be removed from trunk
-            service.setSystemPartition( systemPartition );
+            initSystemPartition();
             
             // Disable the ChangeLog system
             service.getChangeLog().setEnabled( false );
@@ -167,6 +149,8 @@ public class Server {
 
             // Now we can create as many partitions as we need
             Partition ladlePartition = addPartition( "ladle", domainComponent );
+
+            // Setup indexes, access rules, and start it up
             addIndex( ladlePartition, "objectClass", "ou", "dc", "uid" );
             service.setAllowAnonymousAccess( allowAnonymous );
             service.startup();
@@ -186,7 +170,7 @@ public class Server {
             }
 
             // Load up any extra data
-            loadLDIF(ldifFile);
+            loadLDIF(ldifFileName);
 
             // Now create the LDAP server and transport for the Directory Service.
             ldapServer = new LdapServer();
@@ -212,19 +196,19 @@ public class Server {
         if (!service.isStarted()) {
             throw new Exception("Directory service not started");
         } else {
-            InputStream is = null;
+            InputStream inputStream = null;
             SchemaManager schemaManager = service.getSchemaManager();
             try {
-                is = new FileInputStream(filepath);
-                if (is != null) {
-                    LdifReader entries = new LdifReader(is);
+                inputStream = new FileInputStream(filepath);
+                if (inputStream != null) {
+                    LdifReader entries = new LdifReader(inputStream);
                     for (LdifEntry ldifEntry : entries) {
                         DefaultEntry newEntry = new DefaultEntry(schemaManager, ldifEntry.getEntry());
                         service.getAdminSession().add( newEntry );
                     }
                 }
             } finally {
-                if (is != null) is.close();
+                if (inputStream != null) inputStream.close();
             }
         }
     }
@@ -250,7 +234,7 @@ public class Server {
     }
 
     /**
-     * initialize the schema manager and add the schema partition to diectory service
+     * initialize the schema manager and add the schema partition to directory service
      *
      * @throws Exception if the schema LDIF files are not found on the classpath
      */
@@ -296,6 +280,21 @@ public class Server {
         SchemaPartition schemaPartition = new SchemaPartition( schemaManager );
         schemaPartition.setWrappedPartition( schemaLdifPartition );
         service.setSchemaPartition( schemaPartition );
+    }
+
+    private void initSystemPartition() throws Exception {
+        // this is a MANDATORY partition
+        // DO NOT add this via addPartition() method, trunk code complains about duplicate partition
+        // while initializing 
+        JdbmPartition systemPartition = new JdbmPartition(service.getSchemaManager());
+        systemPartition.setId( "system" );
+        systemPartition.setPartitionPath( new File( service.getInstanceLayout().getPartitionsDirectory(), systemPartition.getId() ).toURI() );
+        systemPartition.setSuffixDn( new Dn( ServerDNConstants.SYSTEM_DN ) );
+        systemPartition.setSchemaManager( service.getSchemaManager() );
+
+        // mandatory to call this method to set the system partition
+        // Note: this system partition might be removed from trunk
+        service.setSystemPartition( systemPartition );
     }
 
     /**
