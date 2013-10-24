@@ -194,6 +194,7 @@ describe Ladle, "::Server" do
       end
     end
 
+=begin
     describe ":custom_schemas" do
       it "defaults to an empty list" do
         Ladle::Server.new.custom_schemas.should == []
@@ -209,6 +210,8 @@ describe Ladle, "::Server" do
           custom_schemas.should == %w(net.example.HappySchema net.example.SadSchema)
       end
     end
+=end
+
 
     describe ":additional_classpath" do
       it "defaults to an empty list" do
@@ -351,6 +354,7 @@ describe Ladle, "::Server" do
             collect { |result| result[:givenname].first }.sort.should == %w(Ada Bob)
         end
       end
+=begin
 
       describe "with a custom schema" do
         before do
@@ -367,7 +371,9 @@ describe Ladle, "::Server" do
             collect { |r| r[:species].first }.sort.should == ["Meles meles", "Orycteropus afer"]
         end
       end
+=end
     end
+
 
     describe "binding" do
       it "works with a valid password" do

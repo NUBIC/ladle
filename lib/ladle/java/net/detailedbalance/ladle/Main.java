@@ -44,7 +44,7 @@ public class Main {
                 commandLine.getOptionValue("d"),
                 new File(commandLine.getOptionValue("l")),
                 new File(commandLine.getOptionValue('t')),
-                !commandLine.hasOption('A'));
+                !commandLine.hasOption('A'));/*
             if (commandLine.hasOption('S')) {
                 List<String> schemaClassNames = Arrays.asList(commandLine.getOptionValue('S').split(","));
                 List<Class<?>> schemaClasses = new ArrayList<Class<?>>(schemaClassNames.size());
@@ -52,7 +52,7 @@ public class Main {
                     schemaClasses.add(Class.forName(schemaClassName));
                 }
                 s.setCustomSchemas(schemaClasses);
-            }
+            }*/
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 public void run() {
