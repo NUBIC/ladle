@@ -63,6 +63,7 @@ public class Server {
     private final File tempDir;
     private final String ldifFileName;
     private final File ldifDir;
+    private final String schemaFileName;
     private boolean running = false;
     private Collection<Class<?>> customSchemas = Collections.emptyList();
 
@@ -70,7 +71,8 @@ public class Server {
     private LdapServer ldapServer;
 
     public Server(
-        int port, String domainComponent, File ldifFile, File tempDirBase, boolean allowAnonymous
+        int port, String domainComponent, File ldifFile, File tempDirBase, boolean allowAnonymous,
+        String schemaFileName
     ) {
         this.port = port;
         this.domainComponent = domainComponent;
@@ -78,6 +80,7 @@ public class Server {
         this.tempDir = createTempDir(tempDirBase);
         this.ldifFileName = ldifFile.getPath();
         this.ldifDir = prepareLdif(ldifFile);
+        this.schemaFileName = schemaFileName;
     }
 
     ////// SETUP
@@ -170,6 +173,9 @@ public class Server {
             }
 
             // Load up any extra data
+            if (schemaFileName != null) {
+                loadLDIF(schemaFileName);
+            }
             loadLDIF(ldifFileName);
 
             // Now create the LDAP server and transport for the Directory Service.
@@ -229,7 +235,7 @@ public class Server {
         partition.setPartitionPath( new File( service.getInstanceLayout().getPartitionsDirectory(), partitionId ).toURI() );
         partition.setSuffixDn( new Dn( partitionDn ) );
         service.addPartition( partition );
-        
+
         return partition;
     }
 
@@ -332,9 +338,5 @@ public class Server {
                 log.error("Deleting the temporary directory " + tempDir + " failed", e);
             }
         }
-    }
-
-    public void setCustomSchemas(Collection<Class<?>> customSchemas) {
-        this.customSchemas = customSchemas;
     }
 }

@@ -194,13 +194,12 @@ describe Ladle, "::Server" do
       end
     end
 
-=begin
     describe ":custom_schemas" do
       it "defaults to an empty list" do
         Ladle::Server.new.custom_schemas.should == []
       end
 
-      it "can be set from one class name" do
+      it "can be set from one file name" do
         Ladle::Server.new(:custom_schemas => "net.example.HappySchema").
           custom_schemas.should == %w(net.example.HappySchema)
       end
@@ -210,8 +209,6 @@ describe Ladle, "::Server" do
           custom_schemas.should == %w(net.example.HappySchema net.example.SadSchema)
       end
     end
-=end
-
 
     describe ":additional_classpath" do
       it "defaults to an empty list" do
@@ -354,15 +351,13 @@ describe Ladle, "::Server" do
             collect { |result| result[:givenname].first }.sort.should == %w(Ada Bob)
         end
       end
-=begin
 
       describe "with a custom schema" do
         before do
           @server = create_server(
             :ldif => File.expand_path("../animals-custom.ldif", __FILE__),
             :domain => "dc=example,dc=net",
-            :custom_schemas => %w(net.detailedbalance.ladle.test.AnimalSchema),
-            :additional_classpath => File.expand_path("../animal-schema.jar", __FILE__)
+            :custom_schemas => File.expand_path("../animals-custom-schema.ldif", __FILE__),
           )
         end
 
@@ -371,9 +366,7 @@ describe Ladle, "::Server" do
             collect { |r| r[:species].first }.sort.should == ["Meles meles", "Orycteropus afer"]
         end
       end
-=end
     end
-
 
     describe "binding" do
       it "works with a valid password" do
