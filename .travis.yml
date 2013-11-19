@@ -7,4 +7,5 @@ rvm:
 install:
   - "bundle install"
 
+before_script: 'mkdir -p tmp && export TMPDIR=tmp'
 script: "bundle exec rake ci:spec"
