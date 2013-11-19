@@ -9,7 +9,7 @@ It spins up an actual LDAP server instance, so you can use it to test
 any sort of client application &mdash; anything that communicates over
 the standard LDAP protocol.
 
-Ladle itself is tested on both JRuby 1.6.5 and Ruby 1.8.7 and 1.9.3.
+Ladle itself is tested on both JRuby 1.7.4 and Ruby 1.8.7, 1.9.3, and 2.0.0.
 It is a wrapper around [ApacheDS][] (a pure-java embeddable LDAP
 server), so it needs Java 1.5 or later available whether you are using
 JRuby or not.
@@ -126,7 +126,7 @@ Project links
 -------------
 
 * [API documentation](http://rubydoc.info/github/NUBIC/ladle/master/frames)
-* [Continuous integration](https://public-ci.nubic.northwestern.edu/job/ladle/)
+* [Continuous integration](https://travis-ci.org/NUBIC/ladle)
 * [Issue tracking](http://github.com/NUBIC/ladle/issues)
 
 Non-issue questions can be sent to rhett@detailedbalance.net.
