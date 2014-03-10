@@ -1,3 +1,11 @@
+2.0.0
+=====
+
+- Big jump in version number to represent upgrading to apacheDS 2.x
+- Moved to supporting apacheDS 2.0 instead of 1.0.2
+- Dropped support for custom schema via java file, now done via ldif import
+- Upgraded dependency to net-ldap-0.3.1
+
 0.2.1
 =====
 
