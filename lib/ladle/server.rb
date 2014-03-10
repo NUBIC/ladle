@@ -4,6 +4,8 @@ module Ladle
   ##
   # Controller for Ladle's core feature, the embedded LDAP server.
   class Server
+    ERROR_LEVELS = %w(ERROR WARN)
+
     ##
     # The port from which this server will be available.
     # @return [Fixnum]
@@ -352,8 +354,12 @@ module Ladle
       private
 
       def is_error?(line)
-        kind = (line =~ /^([A-Z]+):/) ? $1 : nil
-        (kind.nil? || %w(ERROR WARN).include?(kind)) && !bogus?(line)
+        kind = line[/^([A-Z]+):/, 1]
+
+        @current_log_level = kind if kind
+        return true if ERROR_LEVELS.include?(@current_log_level) && kind.nil?
+
+        ERROR_LEVELS.include?(kind) && !bogus?(line)
       end
 
       ##
