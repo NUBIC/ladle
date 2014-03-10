@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.summary     = %q{Dishes out steaming helpings of LDAP for fluid testing}
   s.description = %q{Provides an embedded LDAP server for BDD.  The embedded server is built with ApacheDS.}
 
-  s.files         = Dir["{lib,spec}/**/*.[^j]*"] + Dir["*.md"] + Dir["*LICENSE"] + %w(NOTICE)
+  s.files         = Dir["{lib,spec}/**/*.[^(java)]*"] + Dir["*.md"] + Dir["*LICENSE"] + %w(NOTICE)
   s.test_files    = Dir["spec/**/*"]
   s.require_paths = ["lib"]
 
