@@ -312,8 +312,12 @@ module Ladle
         unless @ds_in.closed?
           @ds_in.puts("STOP")
           @ds_in.flush
-          @ds_in.close
         end
+      rescue Errno::EPIPE
+        # ignore broken pipes when the process dies
+        # right before sending the stop
+      ensure
+        @ds_in.close unless @ds_in.closed?
       end
 
       private
