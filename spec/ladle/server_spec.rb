@@ -4,7 +4,7 @@ require 'net/ldap'
 
 describe Ladle, "::Server" do
   def create_server(opts = {})
-    default_opts = { :tmpdir => tmpdir, :timeout => 30 }.merge(
+    default_opts = { :tmpdir => tmpdir, :timeout => 60 }.merge(
       ENV['LADLE_TRACE'] ? { :verbose => true } : { :quiet => true })
     Ladle::Server.new(default_opts.merge(opts))
   end
