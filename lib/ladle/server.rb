@@ -4,6 +4,8 @@ module Ladle
   ##
   # Controller for Ladle's core feature, the embedded LDAP server.
   class Server
+    ERROR_LEVELS = %w(ERROR WARN)
+
     ##
     # The port from which this server will be available.
     # @return [Fixnum]
@@ -99,7 +101,7 @@ module Ladle
       # process.  Used for testing only, so not documented.
       @additional_args = opts[:more_args] || []
 
-      unless @domain =~ /^dc=/
+      unless @domain =~ /^dc=/i
         raise "The domain component must start with 'dc='.  '#{@domain}' does not."
       end
 
@@ -309,8 +311,12 @@ module Ladle
         unless @ds_in.closed?
           @ds_in.puts("STOP")
           @ds_in.flush
-          @ds_in.close
         end
+      rescue Errno::EPIPE
+        # ignore broken pipes when the process dies
+        # right before sending the stop
+      ensure
+        @ds_in.close unless @ds_in.closed?
       end
 
       private
@@ -351,8 +357,12 @@ module Ladle
       private
 
       def is_error?(line)
-        kind = (line =~ /^([A-Z]+):/) ? $1 : nil
-        (kind.nil? || %w(ERROR WARN).include?(kind)) && !bogus?(line)
+        kind = line[/^([A-Z]+):/, 1]
+
+        @current_log_level = kind if kind
+        return true if ERROR_LEVELS.include?(@current_log_level) && kind.nil?
+
+        ERROR_LEVELS.include?(kind) && !bogus?(line)
       end
 
       ##

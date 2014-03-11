@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.summary     = %q{Dishes out steaming helpings of LDAP for fluid testing}
   s.description = %q{Provides an embedded LDAP server for BDD.  The embedded server is built with ApacheDS.}
 
-  s.files         = Dir["{lib,spec}/**/*"] + Dir["*.md"] + Dir["*LICENSE"] + %w(NOTICE)
+  s.files         = Dir["{lib,spec}/**/*.[^(java)]*"] + Dir["*.md"] + Dir["*LICENSE"] + %w(NOTICE)
   s.test_files    = Dir["spec/**/*"]
   s.require_paths = ["lib"]
 
@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 2.0"
   s.add_development_dependency "yard", "~> 0.6.1"
   s.add_development_dependency java ? "maruku" : "rdiscount"
-  s.add_development_dependency "net-ldap", "~> 0.1.1"
+  s.add_development_dependency "net-ldap", "~> 0.3.1"
   s.add_development_dependency "ci_reporter", '~> 1.6'
   s.add_development_dependency 'rake', '~> 0.9.2'
 end
