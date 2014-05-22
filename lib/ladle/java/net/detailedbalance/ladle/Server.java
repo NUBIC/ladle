@@ -18,6 +18,7 @@ import org.apache.directory.server.constants.ServerDNConstants;
 import org.apache.directory.server.core.DefaultDirectoryService;
 import org.apache.directory.server.core.api.CacheService;
 import org.apache.directory.server.core.api.DirectoryService;
+import org.apache.directory.server.core.api.DnFactory;
 import org.apache.directory.server.core.api.InstanceLayout;
 import org.apache.directory.server.core.api.partition.Partition;
 import org.apache.directory.server.core.api.schema.SchemaPartition;
@@ -151,7 +152,7 @@ public class Server {
             service.setDenormalizeOpAttrsEnabled( true );
 
             // Now we can create as many partitions as we need
-            Partition ladlePartition = addPartition( "ladle", domainComponent );
+            Partition ladlePartition = addPartition( "ladle", domainComponent, service.getDnFactory() );
 
             // Setup indexes, access rules, and start it up
             addIndex( ladlePartition, "objectClass", "ou", "dc", "uid" );
@@ -224,13 +225,14 @@ public class Server {
      *
      * @param partitionId The partition Id
      * @param partitionDn The partition DN
+     * @param dnFactory The DN factory
      * @return The newly added partition
      * @throws Exception If the partition can't be added
      */
-    private Partition addPartition( String partitionId, String partitionDn ) throws Exception
+    private Partition addPartition( String partitionId, String partitionDn, DnFactory dnFactory ) throws Exception
     {
         // Create a new partition with the given partition id 
-        JdbmPartition partition = new JdbmPartition(service.getSchemaManager());
+        JdbmPartition partition = new JdbmPartition(service.getSchemaManager(), dnFactory);
         partition.setId( partitionId );
         partition.setPartitionPath( new File( service.getInstanceLayout().getPartitionsDirectory(), partitionId ).toURI() );
         partition.setSuffixDn( new Dn( partitionDn ) );
@@ -279,7 +281,7 @@ public class Server {
         service.setSchemaManager( schemaManager );
         
         // Init the LdifPartition with schema
-        LdifPartition schemaLdifPartition = new LdifPartition( schemaManager );
+        LdifPartition schemaLdifPartition = new LdifPartition( schemaManager, service.getDnFactory() );
         schemaLdifPartition.setPartitionPath( schemaPartitionDirectory.toURI() );
 
         // The schema partition
@@ -292,7 +294,7 @@ public class Server {
         // this is a MANDATORY partition
         // DO NOT add this via addPartition() method, trunk code complains about duplicate partition
         // while initializing 
-        JdbmPartition systemPartition = new JdbmPartition(service.getSchemaManager());
+        JdbmPartition systemPartition = new JdbmPartition( service.getSchemaManager(), service.getDnFactory() );
         systemPartition.setId( "system" );
         systemPartition.setPartitionPath( new File( service.getInstanceLayout().getPartitionsDirectory(), systemPartition.getId() ).toURI() );
         systemPartition.setSuffixDn( new Dn( ServerDNConstants.SYSTEM_DN ) );
@@ -316,7 +318,7 @@ public class Server {
 
         for ( String attribute : attrs )
         {
-            indexedAttributes.add( new JdbmIndex<String, Entry>( attribute, false ) );
+            indexedAttributes.add( new JdbmIndex( attribute, false ) );
         }
 
         ( ( JdbmPartition ) partition ).setIndexedAttributes( indexedAttributes );
