@@ -1,3 +1,9 @@
+2.0.1
+=====
+
+- Updated to apacheDS 2.0.0-M16
+- Added pom.xml to simplify future apacheDS updates
+
 2.0.0
 =====
 
