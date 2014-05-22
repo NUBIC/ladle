@@ -243,6 +243,7 @@ module Ladle
       [
         java_bin,
         "-cp", classpath,
+        ('-Dlog4j.configuration=log4j-quiet.properties' if quiet?),
         "net.detailedbalance.ladle.Main",
         "--port", port,
         "--domain", domain,
