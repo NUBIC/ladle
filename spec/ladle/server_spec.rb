@@ -114,12 +114,12 @@ describe Ladle, "::Server" do
     end
 
     describe ":timeout" do
-      it "defaults to 15 seconds" do
-        Ladle::Server.new.timeout.should == 15
+      it "defaults to 60 seconds" do
+        Ladle::Server.new.timeout.should == 60
       end
 
       it "can be overridden" do
-        Ladle::Server.new(:timeout => 27).timeout.should == 27
+        Ladle::Server.new(:timeout => 87).timeout.should == 87
       end
     end
 
