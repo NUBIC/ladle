@@ -357,7 +357,7 @@ describe Ladle, "::Server" do
           @server = create_server(
             :ldif => File.expand_path("../animals-custom.ldif", __FILE__),
             :domain => "dc=example,dc=net",
-            :custom_schemas => File.expand_path("../animals-custom-schema.ldif", __FILE__),
+            :custom_schemas => File.expand_path("../animals-custom-schema.ldif", __FILE__)
           )
         end
 
