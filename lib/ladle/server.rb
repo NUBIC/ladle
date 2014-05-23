@@ -68,7 +68,7 @@ module Ladle
     # @option opts [Boolean] :quiet (false) if true _no_ information
     #   about regular execution will be printed.  Error information
     #   will still be printed.  This trumps `:verbose`.
-    # @option opts [Fixnum] :timeout (15) the amount of time to wait
+    # @option opts [Fixnum] :timeout (60) the amount of time to wait
     #   (seconds) for the server process to start before giving up.
     # @option opts [String] :tmpdir (ENV['TMPDIR'] or ENV['TEMPDIR'])
     #   the temporary directory to use for the server's files.  If not
@@ -89,7 +89,7 @@ module Ladle
       @allow_anonymous = opts[:allow_anonymous].nil? ? true : opts[:allow_anonymous]
       @quiet = opts[:quiet]
       @verbose = opts[:verbose]
-      @timeout = opts[:timeout] || 15
+      @timeout = opts[:timeout] || 60
       @tmpdir = opts[:tmpdir] || ENV['TMPDIR'] || ENV['TEMPDIR']
       @java_bin = opts[:java_bin] ||
         (ENV['JAVA_HOME'] ? File.join(ENV['JAVA_HOME'], "bin", "java") : "java")
