@@ -4,6 +4,8 @@ module Ladle
   ##
   # Controller for Ladle's core feature, the embedded LDAP server.
   class Server
+    ERROR_LEVELS = %w(ERROR WARN)
+
     ##
     # The port from which this server will be available.
     # @return [Fixnum]
@@ -66,7 +68,7 @@ module Ladle
     # @option opts [Boolean] :quiet (false) if true _no_ information
     #   about regular execution will be printed.  Error information
     #   will still be printed.  This trumps `:verbose`.
-    # @option opts [Fixnum] :timeout (15) the amount of time to wait
+    # @option opts [Fixnum] :timeout (60) the amount of time to wait
     #   (seconds) for the server process to start before giving up.
     # @option opts [String] :tmpdir (ENV['TMPDIR'] or ENV['TEMPDIR'])
     #   the temporary directory to use for the server's files.  If not
@@ -87,7 +89,7 @@ module Ladle
       @allow_anonymous = opts[:allow_anonymous].nil? ? true : opts[:allow_anonymous]
       @quiet = opts[:quiet]
       @verbose = opts[:verbose]
-      @timeout = opts[:timeout] || 15
+      @timeout = opts[:timeout] || 60
       @tmpdir = opts[:tmpdir] || ENV['TMPDIR'] || ENV['TEMPDIR']
       @java_bin = opts[:java_bin] ||
         (ENV['JAVA_HOME'] ? File.join(ENV['JAVA_HOME'], "bin", "java") : "java")
@@ -99,7 +101,7 @@ module Ladle
       # process.  Used for testing only, so not documented.
       @additional_args = opts[:more_args] || []
 
-      unless @domain =~ /^dc=/
+      unless @domain =~ /^dc=/i
         raise "The domain component must start with 'dc='.  '#{@domain}' does not."
       end
 
@@ -243,6 +245,7 @@ module Ladle
       [
         java_bin,
         "-cp", classpath,
+        ('-Dlog4j.configuration=log4j-quiet.properties' if quiet?),
         "net.detailedbalance.ladle.Main",
         "--port", port,
         "--domain", domain,
@@ -309,8 +312,12 @@ module Ladle
         unless @ds_in.closed?
           @ds_in.puts("STOP")
           @ds_in.flush
-          @ds_in.close
         end
+      rescue Errno::EPIPE
+        # ignore broken pipes when the process dies
+        # right before sending the stop
+      ensure
+        @ds_in.close unless @ds_in.closed?
       end
 
       private
@@ -351,8 +358,12 @@ module Ladle
       private
 
       def is_error?(line)
-        kind = (line =~ /^([A-Z]+):/) ? $1 : nil
-        (kind.nil? || %w(ERROR WARN).include?(kind)) && !bogus?(line)
+        kind = line[/^([A-Z]+):/, 1]
+
+        @current_log_level = kind if kind
+        return true if ERROR_LEVELS.include?(@current_log_level) && kind.nil?
+
+        ERROR_LEVELS.include?(kind) && !bogus?(line)
       end
 
       ##

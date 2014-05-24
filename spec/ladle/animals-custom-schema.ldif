@@ -1,0 +1,26 @@
+version: 1
+
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1001,ou=attributeTypes,cn=other,ou=schema
+objectClass: metaAttributeType
+objectClass: metaTop
+objectClass: top
+m-collective: FALSE
+m-description: The species of the animal
+m-equality: caseIgnoreMatch
+m-name: species
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
+m-usage: USER_APPLICATIONS
+m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1001
+
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1001,ou=objectClasses,cn=other,ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Animal
+m-may: cn
+m-may: sn
+m-must: species
+m-supobjectclass: top
+m-name: animal
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1001
+m-typeobjectclass: STRUCTURAL
