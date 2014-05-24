@@ -5,7 +5,7 @@ load File.expand_path("../tasks/remove_task.rake", __FILE__)
 # tasks that require multiple platforms at once.
 
 def package_variants
-  %w(1.8.7 jruby)
+  %w(2.0.0 jruby)
 end
 
 begin
@@ -16,10 +16,11 @@ begin
       def build_gem
         FileUtils.rm_rf 'pkg'
         package_variants.each do |var|
-          sh("rvm #{var}@ladle rake build")
+          sh("rvm #{var}@ladle do rake build")
         end
         results = Dir["pkg/*.gem"]
         Bundler.ui.confirm "#{name} #{version} built to #{results.inspect}"
+        results
       end
 
       def rubygems_push(paths)
