@@ -52,7 +52,7 @@ import java.util.UUID;
  * The idea of using ApacheDS for this was from Spring Security's LDAP test support.  The details
  * are from the ApacheDS embedding and unit testing documentation.
  * <p>
- * This file has been greatly modified to support apacheDS 2.0, based predominantly on
+ * This version uses ApacheDS 2.0 and is based on
  * http://svn.apache.org/repos/asf/directory/sandbox/kayyagari/embedded-sample-trunk/src/main/java/org/apache/directory/seserver/EmbeddedADSVerTrunk.java
  */
 public class Server {
