@@ -63,7 +63,6 @@ public class Server {
     private final boolean allowAnonymous;
     private final File tempDir;
     private final String ldifFileName;
-    private final File ldifDir;
     private boolean running = false;
     private Collection<String> customSchemaFilenames;
 
@@ -79,7 +78,6 @@ public class Server {
         this.allowAnonymous = allowAnonymous;
         this.tempDir = createTempDir(tempDirBase);
         this.ldifFileName = ldifFile.getPath();
-        this.ldifDir = prepareLdif(ldifFile);
         this.customSchemaFilenames = customSchemaFilenames;
     }
 
@@ -107,21 +105,6 @@ public class Server {
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
 
         return env;
-    }
-
-    private File prepareLdif(File ldifFile) {
-        File dir = new File(tempDir, "ldif");
-        if (!dir.mkdir()) {
-            throw new LadleFatalException("Could not create LDIF directory " + dir);
-        }
-
-        try {
-            FileUtils.copyFileToDirectory(ldifFile, dir);
-        } catch (IOException e) {
-            throw new LadleFatalException("Copying " + ldifFileName + " to " + dir + " failed.", e);
-        }
-
-        return dir;
     }
 
     ////// RUNNING
