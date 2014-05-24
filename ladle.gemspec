@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.platform    = java ? 'java' : 'ruby'
   s.authors     = ["Rhett Sutphin"]
   s.email       = ["rhett@detailedbalance.net"]
-  s.homepage    = "http://github.com/rsutphin/ladle"
+  s.homepage    = "http://github.com/NUBIC/ladle"
   s.summary     = %q{Dishes out steaming helpings of LDAP for fluid testing}
   s.description = %q{Provides an embedded LDAP server for BDD.  The embedded server is built with ApacheDS.}
 
