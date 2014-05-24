@@ -1,3 +1,13 @@
+1.0.0
+=====
+
+- Updated to apacheDS 2.0.0-M16 from 1.0.2. (#14, #17, #18; @silarsis, @calavera, @http-418)
+- BACKWARDS_INCOMPATIBLE CHANGE: Custom schemas are now defined in LDIF files,
+  not via the former baroque java system. See CUSTOM-SCHEMA.md for details.
+- Upgraded dependency to net-ldap-0.3.1 (@silarsis)
+- Added pom.xml to simplify downloading future apacheDS updates (@http-418)
+- Avoid EOF error on `Server#stop`. (#12; @iRyusa)
+
 0.2.1
 =====
 
