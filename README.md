@@ -9,16 +9,16 @@ It spins up an actual LDAP server instance, so you can use it to test
 any sort of client application &mdash; anything that communicates over
 the standard LDAP protocol.
 
-Ladle itself is tested on both JRuby 1.7.4 and Ruby 1.8.7, 1.9.3, and 2.0.0.
+Ladle itself is tested on both JRuby 1.7.11 and Ruby 1.9.3, 2.0.0, and 2.1.2.
 It is a wrapper around [ApacheDS][] (a pure-java embeddable LDAP
-server), so it needs Java 1.5 or later available whether you are using
+server), so it needs Java 7 or later available whether you are using
 JRuby or not.
 
 Ladle will not work with MRI on Windows. (A pull request adding this support
 would be eagerly reviewed.) It should work with JRuby on Windows, though this
 hasn't been tested.
 
-[ApacheDS]: http://directory.apache.org/apacheds/1.0/index.html
+[ApacheDS]: http://directory.apache.org/apacheds/
 
 Ladle in 30 seconds
 -------------------
