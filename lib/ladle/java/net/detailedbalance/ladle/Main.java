@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,12 +40,19 @@ public class Main {
                 behaveBadly(commandLine.getOptionValue('F'));
             }
 
+            List<String> schemaFileNames;
+            if (commandLine.hasOption('S')) {
+                schemaFileNames = Arrays.asList(commandLine.getOptionValue('S').split(","));
+            } else {
+                schemaFileNames = Collections.emptyList();
+            }
+
             final Server s = new Server(
                 new Integer(commandLine.getOptionValue("p")),
                 commandLine.getOptionValue("d"),
                 new File(commandLine.getOptionValue("l")),
                 new File(commandLine.getOptionValue('t')),
-                !commandLine.hasOption('A'), commandLine.getOptionValue("S"));
+                !commandLine.hasOption('A'), schemaFileNames);
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 public void run() {

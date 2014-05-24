@@ -64,16 +64,15 @@ public class Server {
     private final File tempDir;
     private final String ldifFileName;
     private final File ldifDir;
-    private final String schemaFileName;
     private boolean running = false;
-    private Collection<Class<?>> customSchemas = Collections.emptyList();
+    private Collection<String> customSchemaFilenames;
 
     private DirectoryService service;
     private LdapServer ldapServer;
 
     public Server(
         int port, String domainComponent, File ldifFile, File tempDirBase, boolean allowAnonymous,
-        String schemaFileName
+        Collection<String> customSchemaFilenames
     ) {
         this.port = port;
         this.domainComponent = domainComponent;
@@ -81,7 +80,7 @@ public class Server {
         this.tempDir = createTempDir(tempDirBase);
         this.ldifFileName = ldifFile.getPath();
         this.ldifDir = prepareLdif(ldifFile);
-        this.schemaFileName = schemaFileName;
+        this.customSchemaFilenames = customSchemaFilenames;
     }
 
     ////// SETUP
@@ -174,7 +173,7 @@ public class Server {
             }
 
             // Load up any extra data
-            if (schemaFileName != null) {
+            for (String schemaFileName : customSchemaFilenames) {
                 loadLDIF(schemaFileName);
             }
             loadLDIF(ldifFileName);
