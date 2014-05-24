@@ -88,7 +88,7 @@ public class Server {
 
     private File createTempDir(File tempDirBase) {
         File temp = new File(tempDirBase, "ladle-server-" + UUID.randomUUID());
-        
+
         if (temp.mkdir()) {
             return temp;
         } else {
@@ -135,18 +135,18 @@ public class Server {
             // Initialize the LDAP service
             service = new DefaultDirectoryService();
             service.setInstanceLayout( new InstanceLayout( tempDir ) );
-            
+
             CacheService cacheService = new CacheService();
             cacheService.initialize( service.getInstanceLayout() );
 
             service.setCacheService( cacheService );
-            
+
             // first load the schema
             initSchemaPartition();
-            
+
             // then the system partition
             initSystemPartition();
-            
+
             // Disable the ChangeLog system
             service.getChangeLog().setEnabled( false );
             service.setDenormalizeOpAttrsEnabled( true );
@@ -196,8 +196,8 @@ public class Server {
         running = true;
     }
 
-    public void loadLDIF(String filepath) throws Exception {  
-          
+    public void loadLDIF(String filepath) throws Exception {
+
         log.info("Loading : " + filepath);
 
         if (!service.isStarted()) {
@@ -231,7 +231,7 @@ public class Server {
      */
     private Partition addPartition( String partitionId, String partitionDn, DnFactory dnFactory ) throws Exception
     {
-        // Create a new partition with the given partition id 
+        // Create a new partition with the given partition id
         JdbmPartition partition = new JdbmPartition(service.getSchemaManager(), dnFactory);
         partition.setId( partitionId );
         partition.setPartitionPath( new File( service.getInstanceLayout().getPartitionsDirectory(), partitionId ).toURI() );
@@ -249,7 +249,7 @@ public class Server {
     private void initSchemaPartition() throws Exception
     {
         InstanceLayout instanceLayout = service.getInstanceLayout();
-        
+
         File schemaPartitionDirectory = new File( instanceLayout.getPartitionsDirectory(), "schema" );
 
         // Extract the schema on disk (a brand new one) and load the registries
@@ -279,7 +279,7 @@ public class Server {
         }
 
         service.setSchemaManager( schemaManager );
-        
+
         // Init the LdifPartition with schema
         LdifPartition schemaLdifPartition = new LdifPartition( schemaManager, service.getDnFactory() );
         schemaLdifPartition.setPartitionPath( schemaPartitionDirectory.toURI() );
@@ -293,7 +293,7 @@ public class Server {
     private void initSystemPartition() throws Exception {
         // this is a MANDATORY partition
         // DO NOT add this via addPartition() method, trunk code complains about duplicate partition
-        // while initializing 
+        // while initializing
         JdbmPartition systemPartition = new JdbmPartition( service.getSchemaManager(), service.getDnFactory() );
         systemPartition.setId( "system" );
         systemPartition.setPartitionPath( new File( service.getInstanceLayout().getPartitionsDirectory(), systemPartition.getId() ).toURI() );
