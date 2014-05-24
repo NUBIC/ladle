@@ -7,6 +7,7 @@
 - Upgraded dependency to net-ldap-0.3.1 (@silarsis)
 - Added pom.xml to simplify downloading future apacheDS updates (@http-418)
 - Avoid EOF error on `Server#stop`. (#12; @iRyusa)
+- Drop support for Ruby 1.8.7.
 
 0.2.1
 =====
