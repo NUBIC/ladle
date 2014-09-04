@@ -149,14 +149,13 @@ describe Ladle, "::Server" do
           should == tmpdir('zap')
       end
 
+      it "must be specified somehow" do
+        Ladle::Server.new.tmpdir.should == Dir.tmpdir
+      end
+
       it "must exist" do
         lambda { Ladle::Server.new(:tmpdir => 'whatever') }.
           should raise_error(/Tmpdir "whatever" does not exist./)
-      end
-
-      it "must be specified somehow" do
-        lambda { Ladle::Server.new }.
-          should raise_error(/Cannot guess tmpdir from the environment.  Please specify it./)
       end
     end
 

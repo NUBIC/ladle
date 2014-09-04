@@ -1,4 +1,5 @@
 require 'ladle'
+require 'tmpdir'
 
 module Ladle
   ##
@@ -90,7 +91,7 @@ module Ladle
       @quiet = opts[:quiet]
       @verbose = opts[:verbose]
       @timeout = opts[:timeout] || 60
-      @tmpdir = opts[:tmpdir] || ENV['TMPDIR'] || ENV['TEMPDIR']
+      @tmpdir = opts[:tmpdir] || ENV['TEMPDIR'] || Dir.tmpdir
       @java_bin = opts[:java_bin] ||
         (ENV['JAVA_HOME'] ? File.join(ENV['JAVA_HOME'], "bin", "java") : "java")
       @custom_schemas = opts[:custom_schemas] ? [*opts[:custom_schemas]] : []
@@ -105,9 +106,7 @@ module Ladle
         raise "The domain component must start with 'dc='.  '#{@domain}' does not."
       end
 
-      if tmpdir.nil?
-        raise "Cannot guess tmpdir from the environment.  Please specify it."
-      elsif !File.directory?(tmpdir)
+      unless File.directory?(tmpdir)
         raise "Tmpdir #{tmpdir.inspect} does not exist."
       end
 
