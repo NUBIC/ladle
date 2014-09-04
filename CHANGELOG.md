@@ -1,3 +1,8 @@
+1.0.1
+=====
+
+- Use the more thorough tmpdir detection provided by `Dir.tmpdir`. (#21, @pirj)
+
 1.0.0
 =====
 
