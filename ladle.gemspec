@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency "open4", "~> 1.0" unless java
-  s.add_development_dependency "rspec", "~> 2.0"
+  s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "yard", "~> 0.6.1"
   s.add_development_dependency java ? "maruku" : "rdiscount"
   s.add_development_dependency "net-ldap", "~> 0.3.1"

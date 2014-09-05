@@ -11,15 +11,15 @@ describe Ladle, "::Server" do
 
   def should_be_running
     s = nil
-    lambda { s = TCPSocket.new('localhost', @server.port) }.
-      should_not raise_error
+    expect { s = TCPSocket.new('localhost', @server.port) }.
+      not_to raise_error
     s.close if s
   end
 
   def should_not_be_running
     s = nil
-    lambda { s = TCPSocket.new('localhost', @server.port) }.
-      should raise_error(/Connection refused/)
+    expect { s = TCPSocket.new('localhost', @server.port) }.
+      to raise_error(/Connection refused/)
     s.close if s
   end
 
@@ -37,7 +37,7 @@ describe Ladle, "::Server" do
       $stderr.puts "Killing leftover process #{pid}"
       Process.kill 15, pid
     }
-    left_over_pids.should be_empty
+    expect(left_over_pids).to be_empty
   end
 
   describe "initialization of" do
@@ -52,74 +52,74 @@ describe Ladle, "::Server" do
 
     describe ":port" do
       it "defaults to 3897" do
-        Ladle::Server.new.port.should == 3897
+        expect(Ladle::Server.new.port).to eq(3897)
       end
 
       it "can be overridden" do
-        Ladle::Server.new(:port => 4200).port.should == 4200
+        expect(Ladle::Server.new(:port => 4200).port).to eq(4200)
       end
     end
 
     describe ":domain" do
       it "defaults to dc=example,dc=org" do
-        Ladle::Server.new.domain.should == "dc=example,dc=org"
+        expect(Ladle::Server.new.domain).to eq("dc=example,dc=org")
       end
 
       it "can be overridden" do
-        Ladle::Server.new(:domain => "dc=northwestern,dc=edu").domain.
-          should == "dc=northwestern,dc=edu"
+        expect(Ladle::Server.new(:domain => "dc=northwestern,dc=edu").domain).
+          to eq("dc=northwestern,dc=edu")
       end
 
       it "rejects a domain that doesn't start with 'dc='" do
-        lambda { Ladle::Server.new(:domain => "foo") }.
-          should raise_error("The domain component must start with 'dc='.  'foo' does not.")
+        expect { Ladle::Server.new(:domain => "foo") }.
+          to raise_error("The domain component must start with 'dc='.  'foo' does not.")
       end
     end
 
     describe ":ldif" do
       it "defaults to lib/ladle/default.ldif" do
-        Ladle::Server.new.ldif.should =~ %r{lib/ladle/default.ldif$}
+        expect(Ladle::Server.new.ldif).to match(%r{lib/ladle/default.ldif$})
       end
 
       it "can be overridden" do
         ldif_file = "#{tmpdir}/foo.ldif"
         FileUtils.touch ldif_file
-        Ladle::Server.new(:ldif => ldif_file).ldif.should == ldif_file
+        expect(Ladle::Server.new(:ldif => ldif_file).ldif).to eq(ldif_file)
       end
 
       it "fails if the file can't be read" do
-        lambda { Ladle::Server.new(:ldif => "foo/bar.ldif") }.
-          should raise_error("Cannot read specified LDIF file foo/bar.ldif.")
+        expect { Ladle::Server.new(:ldif => "foo/bar.ldif") }.
+          to raise_error("Cannot read specified LDIF file foo/bar.ldif.")
       end
     end
 
     describe ":verbose" do
       it "defaults to false" do
-        Ladle::Server.new.verbose?.should be_false
+        expect(Ladle::Server.new.verbose?).to be_falsey
       end
 
       it "can be overridden" do
-        Ladle::Server.new(:verbose => true).verbose?.should be_true
+        expect(Ladle::Server.new(:verbose => true).verbose?).to be_truthy
       end
     end
 
     describe ":quiet" do
       it "defaults to false" do
-        Ladle::Server.new.quiet?.should be_false
+        expect(Ladle::Server.new.quiet?).to be_falsey
       end
 
       it "can be overridden" do
-        Ladle::Server.new(:quiet => true).quiet?.should be_true
+        expect(Ladle::Server.new(:quiet => true).quiet?).to be_truthy
       end
     end
 
     describe ":timeout" do
       it "defaults to 60 seconds" do
-        Ladle::Server.new.timeout.should == 60
+        expect(Ladle::Server.new.timeout).to eq(60)
       end
 
       it "can be overridden" do
-        Ladle::Server.new(:timeout => 87).timeout.should == 87
+        expect(Ladle::Server.new(:timeout => 87).timeout).to eq(87)
       end
     end
 
@@ -134,28 +134,28 @@ describe Ladle, "::Server" do
 
       it "defaults to TMPDIR if set" do
         ENV["TMPDIR"] = tmpdir('foo')
-        Ladle::Server.new.tmpdir.should == tmpdir('foo')
+        expect(Ladle::Server.new.tmpdir).to eq(tmpdir('foo'))
       end
 
       it "defaults to TEMPDIR if set" do
         ENV["TEMPDIR"] = tmpdir('baz')
-        Ladle::Server.new.tmpdir.should == tmpdir('baz')
+        expect(Ladle::Server.new.tmpdir).to eq(tmpdir('baz'))
       end
 
       it "prefers the explicitly provided value" do
         ENV["TMPDIR"] = tmpdir('quux')
         ENV["TEMPDIR"] = tmpdir('bar')
-        Ladle::Server.new(:tmpdir => tmpdir('zap')).tmpdir.
-          should == tmpdir('zap')
+        expect(Ladle::Server.new(:tmpdir => tmpdir('zap')).tmpdir).
+          to eq(tmpdir('zap'))
       end
 
       it "must be specified somehow" do
-        Ladle::Server.new.tmpdir.should == Dir.tmpdir
+        expect(Ladle::Server.new.tmpdir).to eq(Dir.tmpdir)
       end
 
       it "must exist" do
-        lambda { Ladle::Server.new(:tmpdir => 'whatever') }.
-          should raise_error(/Tmpdir "whatever" does not exist./)
+        expect { Ladle::Server.new(:tmpdir => 'whatever') }.
+          to raise_error(/Tmpdir "whatever" does not exist./)
       end
     end
 
@@ -169,59 +169,59 @@ describe Ladle, "::Server" do
       end
 
       it "relies on the path with no JAVA_HOME" do
-        Ladle::Server.new.java_bin.should == "java"
+        expect(Ladle::Server.new.java_bin).to eq("java")
       end
 
       it "defaults to JAVA_HOME/bin/java if available" do
         ENV["JAVA_HOME"] = tmpdir('myjdk')
-        Ladle::Server.new.java_bin.should == "#{tmpdir}/myjdk/bin/java"
+        expect(Ladle::Server.new.java_bin).to eq("#{tmpdir}/myjdk/bin/java")
       end
 
       it "can be overridden" do
-        Ladle::Server.new(:java_bin => File.join(tmpdir('openjdk'), "jre")).java_bin.
-          should == "#{tmpdir}/openjdk/jre"
+        expect(Ladle::Server.new(:java_bin => File.join(tmpdir('openjdk'), "jre")).java_bin).
+          to eq("#{tmpdir}/openjdk/jre")
       end
     end
 
     describe ":allow_anonymous" do
       it "defaults to true" do
-        Ladle::Server.new.allow_anonymous?.should be_true
+        expect(Ladle::Server.new.allow_anonymous?).to be_truthy
       end
 
       it "can be overridden" do
-        Ladle::Server.new(:allow_anonymous => false).allow_anonymous?.should be_false
+        expect(Ladle::Server.new(:allow_anonymous => false).allow_anonymous?).to be_falsey
       end
     end
 
     describe ":custom_schemas" do
       it "defaults to an empty list" do
-        Ladle::Server.new.custom_schemas.should == []
+        expect(Ladle::Server.new.custom_schemas).to eq([])
       end
 
       it "can be set from one file name" do
-        Ladle::Server.new(:custom_schemas => "net.example.HappySchema").
-          custom_schemas.should == %w(net.example.HappySchema)
+        expect(Ladle::Server.new(:custom_schemas => "net.example.HappySchema").
+          custom_schemas).to eq(%w(net.example.HappySchema))
       end
 
       it "can be set from a list" do
-        Ladle::Server.new(:custom_schemas => ["net.example.HappySchema", "net.example.SadSchema"]).
-          custom_schemas.should == %w(net.example.HappySchema net.example.SadSchema)
+        expect(Ladle::Server.new(:custom_schemas => ["net.example.HappySchema", "net.example.SadSchema"]).
+          custom_schemas).to eq(%w(net.example.HappySchema net.example.SadSchema))
       end
     end
 
     describe ":additional_classpath" do
       it "defaults to an empty list" do
-        Ladle::Server.new.additional_classpath.should == []
+        expect(Ladle::Server.new.additional_classpath).to eq([])
       end
 
       it "can be set from one entry" do
-        Ladle::Server.new(:additional_classpath => "foo").
-          additional_classpath.should == %w(foo)
+        expect(Ladle::Server.new(:additional_classpath => "foo").
+          additional_classpath).to eq(%w(foo))
       end
 
       it "can be set from a list" do
-        Ladle::Server.new(:additional_classpath => ["bar", "baz"]).
-          additional_classpath.should == %w(bar baz)
+        expect(Ladle::Server.new(:additional_classpath => ["bar", "baz"]).
+          additional_classpath).to eq(%w(bar baz))
       end
     end
   end
@@ -233,12 +233,12 @@ describe Ladle, "::Server" do
     end
 
     it "returns the server object" do
-      @server.start.should be(@server)
+      expect(@server.start).to be(@server)
     end
 
     it "is safe to invoke twice (in the same thread)" do
       @server.start
-      lambda { @server.start }.should_not raise_error
+      expect { @server.start }.not_to raise_error
     end
 
     it "can be stopped then started again" do
@@ -252,16 +252,16 @@ describe Ladle, "::Server" do
       old_stderr, $stderr = $stderr, StringIO.new
 
       @server = create_server(:more_args => ["--fail", "before_start"])
-      lambda { @server.start }.should raise_error(/LDAP server failed to start/)
-      $stderr.string.should == "ApacheDS process failed: FATAL: Expected failure for testing\n"
+      expect { @server.start }.to raise_error(/LDAP server failed to start/)
+      expect($stderr.string).to eq("ApacheDS process failed: FATAL: Expected failure for testing\n")
 
       $stderr = old_stderr
     end
 
     it "times out after the specified interval" do
       @server = create_server(:timeout => 3, :more_args => %w(--fail hang))
-      lambda { @server.start }.
-        should raise_error(/LDAP server startup did not complete within 3 seconds/)
+      expect { @server.start }.
+        to raise_error(/LDAP server startup did not complete within 3 seconds/)
     end
 
     it "should use the specified port" do
@@ -272,14 +272,14 @@ describe Ladle, "::Server" do
     it "uses the specified tmpdir" do
       target = tmpdir('baz')
       @server = create_server(:tmpdir => target).start
-      Dir["#{target}/ladle-server-*"].size.should == 1
+      expect(Dir["#{target}/ladle-server-*"].size).to eq(1)
     end
 
     it "cleans up the tmpdir afterward" do
       target = tmpdir('quux')
       @server = create_server(:tmpdir => target).start
       @server.stop
-      Dir["#{target}/ladle-server-*"].size.should == 0
+      expect(Dir["#{target}/ladle-server-*"].size).to eq(0)
     end
   end
 
@@ -301,7 +301,7 @@ describe Ladle, "::Server" do
           :base => base || 'dc=example,dc=org',
           :filter => filter
         ).tap {
-          ldap.get_operation_result.code.should == 0 # success
+          expect(ldap.get_operation_result.code).to eq(0) # success
         }
       }
     end
@@ -309,26 +309,26 @@ describe Ladle, "::Server" do
     describe "data" do
       describe "the default set" do
         it "has 26 people" do
-          ldap_search(Net::LDAP::Filter.pres('uid')).should have(26).people
+          expect(ldap_search(Net::LDAP::Filter.pres('uid')).size).to eq(26)
         end
 
         it "has 1 group" do
-          ldap_search(Net::LDAP::Filter.pres('ou')).should have(1).group
+          expect(ldap_search(Net::LDAP::Filter.pres('ou')).size).to eq(1)
         end
 
         it "has given names" do
-          ldap_search(Net::LDAP::Filter.pres('uid')).
-            select { |res| !res[:givenname] || res[:givenname].empty? }.should == []
+          expect(ldap_search(Net::LDAP::Filter.pres('uid')).
+            select { |res| !res[:givenname] || res[:givenname].empty? }).to eq([])
         end
 
         it "has e-mail addresses" do
-          ldap_search(Net::LDAP::Filter.pres('uid')).
-            select { |res| !res[:mail] || res[:mail].empty? }.should == []
+          expect(ldap_search(Net::LDAP::Filter.pres('uid')).
+            select { |res| !res[:mail] || res[:mail].empty? }).to eq([])
         end
 
         it "can be searched by value" do
-          ldap_search(Net::LDAP::Filter.eq(:givenname, 'Josephine')).
-            collect { |res| res[:uid].first }.should == %w(jj243)
+          expect(ldap_search(Net::LDAP::Filter.eq(:givenname, 'Josephine')).
+            collect { |res| res[:uid].first }).to eq(%w(jj243))
         end
       end
 
@@ -341,13 +341,13 @@ describe Ladle, "::Server" do
         end
 
         it "has the groups provided by the other LDIF" do
-          ldap_search(Net::LDAP::Filter.pres('ou'), 'dc=example,dc=net').
-            collect { |result| result[:ou].first }.should == ["animals"]
+          expect(ldap_search(Net::LDAP::Filter.pres('ou'), 'dc=example,dc=net').
+            collect { |result| result[:ou].first }).to eq(["animals"])
         end
 
         it "has the individuals provided by the other LDIF" do
-          ldap_search(Net::LDAP::Filter.pres('uid'), 'dc=example,dc=net').
-            collect { |result| result[:givenname].first }.sort.should == %w(Ada Bob)
+          expect(ldap_search(Net::LDAP::Filter.pres('uid'), 'dc=example,dc=net').
+            collect { |result| result[:givenname].first }.sort).to eq(%w(Ada Bob))
         end
       end
 
@@ -361,8 +361,8 @@ describe Ladle, "::Server" do
         end
 
         it "has the data defined in the schema" do
-          ldap_search(Net::LDAP::Filter.pres('species'), 'dc=example,dc=net').
-            collect { |r| r[:species].first }.sort.should == ["Meles meles", "Orycteropus afer"]
+          expect(ldap_search(Net::LDAP::Filter.pres('species'), 'dc=example,dc=net').
+            collect { |r| r[:species].first }.sort).to eq(["Meles meles", "Orycteropus afer"])
         end
       end
     end
@@ -371,14 +371,14 @@ describe Ladle, "::Server" do
       it "works with a valid password" do
         with_ldap do |ldap|
           ldap.authenticate("uid=hh153,ou=people,dc=example,dc=org", "hatfield".reverse)
-          ldap.bind.should be_true
+          expect(ldap.bind).to be_truthy
         end
       end
 
       it "does not work with an invalid password" do
         with_ldap do |ldap|
           ldap.authenticate("uid=hh153,ou=people,dc=example,dc=org", "mccoy".reverse)
-          ldap.bind.should be_false
+          expect(ldap.bind).to be_falsey
         end
       end
 
@@ -392,29 +392,29 @@ describe Ladle, "::Server" do
             # anonymous bind is successful even with anonymous access
             # off, but searches fail appropriately
             ldap.search(:filter => Net::LDAP::Filter.pres('uid'), :base => 'dc=example,dc=org')
-            ldap.get_operation_result.code.should == 49 # invalid credentials
+            expect(ldap.get_operation_result.code).to eq(49) # invalid credentials
           end
         end
 
         it "will bind with a username and valid password" do
           with_ldap do |ldap|
             ldap.authenticate("uid=kk891,ou=people,dc=example,dc=org", "enilk")
-            ldap.bind.should be_true
+            expect(ldap.bind).to be_truthy
           end
         end
 
         it "will not bind with a username and invalid password" do
           with_ldap do |ldap|
             ldap.authenticate("uid=kk891,ou=people,dc=example,dc=org", "kevin")
-            ldap.bind.should be_false
+            expect(ldap.bind).to be_falsey
           end
         end
 
         it "permits searches for authenticated users" do
           with_ldap do |ldap|
             ldap.authenticate("uid=kk891,ou=people,dc=example,dc=org", "enilk")
-            ldap.search(:filter => Net::LDAP::Filter.pres('uid'), :base => 'dc=example,dc=org').
-              should have(26).results
+            expect(ldap.search(:filter => Net::LDAP::Filter.pres('uid'), :base => 'dc=example,dc=org').size).
+              to eq(26)
           end
         end
       end
