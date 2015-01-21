@@ -374,7 +374,8 @@ module Ladle
           %r{attributeType w/ OID 2.5.4.16 not registered},
           %r{default.*?cache size},
           %r{change the admin password},
-          %r{Attribute \S+ does not have normalizer}
+          %r{Attribute \S+ does not have normalizer},
+          %r{attribute \S+ was not recognized as a valid attributeType}
         ].detect { |re| line =~ re }
       end
     end
