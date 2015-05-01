@@ -2,6 +2,8 @@
 =====
 
 - Use the more thorough tmpdir detection provided by `Dir.tmpdir`. (#21, @pirj)
+- Treat unrecognized attributeType as bogus warning. (#25, @mtodd)
+
 
 1.0.0
 =====
