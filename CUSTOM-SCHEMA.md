@@ -29,7 +29,7 @@ Put the ldif somewhere in your project, then configure the
     )
 
 You may also combine the custom schema declarations in the data LDIF (the file
-named by the `:ldif` option). If you do this, do can skip the `:custom_schemas`
+named by the `:ldif` option). If you do this, you can skip the `:custom_schemas`
 option entirely. The separate `:custom_schemas` option is nice if you use the
 same schema but different data in different tests, or if you use an externally-
 provided schema. If your tests aren't that complicated, then combining them into
